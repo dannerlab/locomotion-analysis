@@ -4,3 +4,4 @@ neo
 scipy
 pyyaml
 IPython
+tables
