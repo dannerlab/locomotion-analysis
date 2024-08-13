@@ -1,3 +1,6 @@
+#from Locoproc under GNU Lesser Public License
+#Modifications made 8/13/2024 L. Schoenhals
+
 import pandas as pd
 import numpy as np
 import neo.rawio
@@ -173,6 +176,9 @@ if __name__ == "__main__":
     options, args = parser.parse_args()
 
     file_ending = options.filename.split('.')[-1]
+    parent_folder = os.path.dirname(os.path.dirname(options.filename)) #locomotion-analysis/Sample_data/V3Off_Levelwalk/smr/gp3m4_1.smr
+    save_folder = os.path.join(parent_folder,'h5')
+    save_name = os.path.join(save_folder, options.filename.split('/')[-1][:-3]+'h5')
 
     if file_ending == 'smr':
         df_kinematics, df_emg, ev_chs = load_spike2(options.filename)
@@ -224,7 +230,7 @@ if __name__ == "__main__":
 
         #print(df_kinematics)
         #print(df_emg)
-        save_h5(options.filename[:-4]+'.h5', df_kinematics, df_emg)
+        save_h5(save_name, df_kinematics, df_emg)
         if not df_ev_chs.empty:
             df_ev_chs.to_csv(options.filename[:-4] + '.phase', index=False)
 
@@ -234,4 +240,4 @@ if __name__ == "__main__":
         except:
             print('Filetype cannot be read as of now - will implement soon')
             exit()
-        save_h5(options.filename[:-4]+'.h5',df_kinematics,df_emg)
+        save_h5(save_name,df_kinematics,df_emg)
