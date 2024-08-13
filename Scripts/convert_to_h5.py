@@ -177,7 +177,9 @@ if __name__ == "__main__":
 
     file_ending = options.filename.split('.')[-1]
     parent_folder = os.path.dirname(os.path.dirname(options.filename)) #locomotion-analysis/Sample_data/V3Off_Levelwalk/smr/gp3m4_1.smr
-    save_folder = os.path.join(parent_folder,'h5')
+    save_folder = os.path.join(parent_folder, "h5")
+    if not os.path.exists(save_folder):
+        os.makedirs(save_folder, exist_ok=True)
     save_name = os.path.join(save_folder, options.filename.split('/')[-1][:-3]+'h5')
 
     if file_ending == 'smr':
