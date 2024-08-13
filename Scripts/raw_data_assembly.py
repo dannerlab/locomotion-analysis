@@ -120,7 +120,7 @@ def get_indices(h5_df, cycle_df, cycle_key):
                 indices.append(segment)
                 break #stop after first match
     return indices
-    
+
 
 def get_step_data(h5_path, phase_path):
     #gets stepcyclewise data for each trial
@@ -155,11 +155,11 @@ def get_step_data(h5_path, phase_path):
                 'include-stance': incl_stance})
     cycle_df['stance-duration'] = cycle_df['stance-stop'] - cycle_df['stance-start']
     cycle_df['swing-duration'] = cycle_df['swing-stop'] - cycle_df['swing-start']
-    
+
     #append trial data to cycle_df
     for key in trial_data.keys():
         cycle_df[key] = trial_data[key][0]
-    
+
 
     #retrieve indices from h5
     h5_df = import_kinematics(h5_path)
@@ -174,18 +174,18 @@ def get_step_data(h5_path, phase_path):
                'stance-start-idx': stance_start_indices,
                'stance-stop-idx': stance_stop_indices
     })
-     
+
     #combine step data from phase with indices corresponding to h5
     stepwise_table = pd.concat((cycle_df, indices), axis = 1)
 
     #add columns for second swing to allow slicing for stance then swing steps
     step_table = add_second_swing(stepwise_table)
-    
+
     return step_table
 
 
 def analysis_table(h5_dirs):
-    
+
     #get the phase directories
     phase_dirs = []
     for dir in h5_dirs:
@@ -243,10 +243,9 @@ def analysis_table(h5_dirs):
             list_of_step_dfs.append(stepwise_table)
         else:
             print(f'file mismatch: \nh5: {trialname_h5}, phase: {trailname_phase}')
-        #print(h5_path, phase_path)
-    
+
     step_cycle_df = pd.concat((list_of_step_dfs), ignore_index = True)
-    
+
     return step_cycle_df
 
 
@@ -255,7 +254,7 @@ def add_second_swing(step_table):
     #recommend using this rather than indexing through each time because it handles mouse & trial separation
 
     swing_cols = ['swing-start', 'swing-stop', 'swing-duration', 'include-swing', 'swing-start-idx', 'swing-stop-idx']
-    
+
     second_step_table = pd.DataFrame()
     for mouse_id in step_table['mouse-id'].unique():
         for trial in step_table['trial-number'].unique():
@@ -270,10 +269,8 @@ def add_second_swing(step_table):
 def main():
     start_time = time.time()
     #which groups to analyze
-    h5_dirs = ['mouse-V3-analysis/data/kinematics-modeling-v1/WT_levelwalk/h5',
-               'mouse-V3-analysis/data/kinematics-modeling-v1/WT_incline/h5-for-phase',
-               'mouse-V3-analysis/data/kinematics-modeling-v1/MUT_levelwalk/h5-for-phase',
-               'mouse-V3-analysis/data/kinematics-modeling-v1/MUT_incline/h5-for-phase']
+    h5_dirs = ['Sample_data/V3Off_Levelwalk/h5',
+               'Sample_data/WT_Levelwalk/h5',]
 
     save_dir = os.path.split(os.path.split(h5_dirs[0])[0])[0]
 
