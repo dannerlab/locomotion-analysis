@@ -1,0 +1,104 @@
+#from Locoproc under GNU Lesser General Public License
+#not modified 8/13/2024
+
+
+kinematics:
+  Ankle_angle:
+  - Angle Ank
+  - Ankle ang
+  - Ankle (de
+  - ankle ang
+  Ankle_x:
+  - Ankle X
+  - ankx (cm)
+  - ankx__cm_
+  - ankle x (
+  Ankle_y:
+  - Ankle Y
+  - anky (cm)
+  - anky__cm_
+  - ankle y (
+  Front_ToeTip_x:
+  - FL toex
+  - FL_toex
+  - FLtx (cm)
+  Front_ToeTip_y:
+  - FL toey
+  - FL_toey
+  - FLty (cm)
+  Hip_angle:
+  - Angle Hip
+  - Hip angle
+  - Hip (deg)
+  - hip angle
+  Hip_x:
+  - Hip X
+  - Hipx (cm)
+  - Hipx__cm_
+  - Hip x (x1
+  Hip_y:
+  - Hip Y
+  - Hipy (cm)
+  - Hipy__cm_
+  - Hip y (x1
+  IliacCrest_x:
+  - Crest X
+  - Crx (cm)
+  - Crx__cm_
+  - Crest x (
+  IliacCrest_y:
+  - Crest Y
+  - Cry (cm)
+  - Cry__cm_
+  - Crest y (
+  Knee_angle:
+  - Angle Kne
+  - Knee angl
+  - Knee (deg
+  - v. knee a
+  Knee_x:
+  - Knee X
+  - kneex
+  - Knee x
+  Knee_y:
+  - Knee Y
+  - kneey
+  - Knee y
+  MTP_angle:
+  - Angle Paw
+  - MTP angle
+  - MTP (deg)
+  - paw angle
+  Metatarsal_x:
+  - Paw X
+  - MTPx (cm)
+  - MTPx__cm_
+  - paw x (x1
+  Metatarsal_y:
+  - Paw Y
+  - MTPy (cm)
+  - MTPy__cm_
+  - paw y (x1
+  ToeTip_x:
+  - Toe X
+  - toex (cm)
+  - toex__cm_
+  - toe x (x1
+  ToeTip_y:
+  - Toe Y
+  - toey (cm)
+  - toey__cm_
+  - toe y (x1
+  Toe_touch:
+  - Toe Touch
+  - toe touch
+  - toe touch (
+  Toe_off:
+  - toe off (
+  - Toe Off
+  - toe off
+ev_chs:
+  Toe_touch_ev:
+  - toetouch
+  Toe_off_ev:
+  - toeoff
