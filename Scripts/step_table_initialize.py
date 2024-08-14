@@ -7,7 +7,8 @@ import os, glob
 import pandas as pd
 import numpy as np
 import IPython
-from stepwise_data_calc import add_position_stats, calc_discrete_stats, add_second_swing, calc_joint_angle_stats
+from stepwise_data_calc import add_position_stats, calc_discrete_stats, add_second_swing, calc_joint_angle_stats, calc_segmental_stats
+from segmental_calc import calculate_segmental_angles
 
 #Helper functions
 
@@ -175,18 +176,35 @@ def step_table_initialize(h5_dirs):
     phase_paths, h5_paths = get_paths(h5_dirs)
     belt_speed = 15 #cm/s
     joint_angles = ["Hip_angle", "Knee_angle", "Ankle_angle", "MTP_angle"]
+    segment_dict = {"Crest": ["IliacCrest", "Hip"],
+                    "Thigh": ["Hip", "Knee"],
+                    "Shank": ["Knee", "Ankle"]}
+    slicing_dict = {"step": ['swing-start-idx', 'stance-stop-idx'], #step will be default as long as it is in position 0
+                    "swing": ['swing-start-idx', 'swing-stop-idx'],
+                    "stance": ['stance-start-idx', 'stance-stop-idx'],
+                    #"step-toe-touch-idx": ['stance-start-idx', 'second-swing-stop-idx'],
+                    #"e1",
+                    #"e2",
+                    #"e3",
+                    #"e4"
+                    }
+
 
     step_dfs_by_trial = []
     for h5_path, phase_path in zip(h5_paths, phase_paths):
         trialname_h5 = os.path.splitext(os.path.split(h5_path)[1])[0]
         trailname_phase = os.path.splitext(os.path.split(phase_path)[1])[0]
         if trialname_h5 == trailname_phase:
+            #basic set-up
+            calculate_segmental_angles(h5_path, segment_dict)
             trial_data = get_trial_data(h5_path, belt_speed)
-            step_table = get_step_data(h5_path, phase_path, trial_data)
+            step_table = get_step_data(h5_path, phase_path, trial_data) #will require update once we add ankle phases
             step_table = add_second_swing(step_table)
-            step_table = add_position_stats(step_table)
-            step_table = calc_discrete_stats(step_table)
-            step_table = calc_joint_angle_stats(step_table, joint_angles)
+
+            #additional calculations
+            step_table = calc_discrete_stats(step_table, slicing_dict)
+            step_table = calc_joint_angle_stats(step_table, joint_angles, slicing_dict)
+            step_table = calc_segmental_stats(step_table, segment_dict, slicing_dict)
             step_dfs_by_trial.append(step_table)
         else:
             print(f'file mismatch: \nh5: {trialname_h5}, phase: {trailname_phase}')
