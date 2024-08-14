@@ -3,8 +3,17 @@ calculate segmental angles throughout step cycle & add this data to h5 file
 """
 
 import pandas as pd
-from step_table_initialize import import_kinematics
 import numpy as np
+import os
+
+def import_kinematics(file):
+    #imports the kinematics portion of the hdf
+    if not os.path.exists(file):
+        print(f"File not found: {file}")
+        return None
+    key = 'df_kinematics'
+    kinematics_df = pd.read_hdf(file, key)
+    return kinematics_df
 
 def calculate_segmental_angles(h5_path, segment_dict):
     h5_df = import_kinematics(h5_path)
@@ -25,6 +34,7 @@ def calculate_segmental_angles(h5_path, segment_dict):
     return
 
 def main():
+    #for testing, normally run through step_table_initialize
     #formatting of segment dict = {"Segment": ["UpperJoint", "LowerJoint"]}
     segment_dict = {"Crest": ["IliacCrest", "Hip"],
                     "Thigh": ["Hip", "Knee"],
