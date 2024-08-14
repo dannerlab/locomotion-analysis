@@ -2,26 +2,34 @@
 
 import os
 
-groups = ["V3Off_Levelwalk", "WT_Levelwalk"]
-data_folder = "Sample_data"
-dirs = []
-for group in groups:
-    directory = f'{data_folder}/{group}/smr'
-    dirs.append(directory)
+def batch_convert(groups):
 
-convert_to_h5 = "Scripts/convert_to_h5.py"
+    data_folder = "Sample_data"
+    dirs = []
+    for group in groups:
+        directory = f'{data_folder}/{group}/smr'
+        dirs.append(directory)
 
-processed_files = 0
+    convert_to_h5 = "Scripts/convert_to_h5.py"
 
-for directory in dirs:
-    if os.path.exists(directory):
-        for file in os.listdir(directory):
-            f = os.path.join(directory, file)
-            os.system(f'python {convert_to_h5} -f {f} -u')   #runs convert_to_h5.py with u units on the files in the directory
-            processed_files += 1
+    processed_files = 0
 
-    else:
-        print(directory)
-        print("the file path you entered does not exist\n")
+    for directory in dirs:
+        if os.path.exists(directory):
+            for file in os.listdir(directory):
+                f = os.path.join(directory, file)
+                os.system(f'python {convert_to_h5} -f {f} -u')   #runs convert_to_h5.py with u units on the files in the directory
+                processed_files += 1
 
-print(f'processed files: {processed_files}')
+        else:
+            print(directory)
+            print("the file path you entered does not exist\n")
+
+    print(f'processed files: {processed_files}')
+
+def main():
+    groups = ["V3Off_Levelwalk", "WT_Levelwalk"]
+    batch_convert(groups)
+
+if __name__ == "__main__":
+    main()
