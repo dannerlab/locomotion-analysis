@@ -121,6 +121,50 @@ def get_indices(h5_df, cycle_df, cycle_key):
                 break #stop after first match
     return indices
 
+def add_discrete_stats(step_table, key):
+
+    toe_tip_x_max = []
+    toe_tip_x_min = []
+    toe_tip_x_end = []
+    toe_tip_x_excursion = []
+    toe_tip_y_max = []
+    iliac_crest_y_max = []
+    iliac_crest_y_min = []
+    iliac_crest_y_excursion = []
+
+    for step_i, trial in step_table.iterrows():
+        h5_path = trial['source-data-h5-path']
+        h5_df = pd.read_hdf(h5_path, key)
+
+        # Get step slice
+        start = trial['swing-start-idx']
+        stop = trial['stance-stop-idx']
+        step_slice = h5_df[start:stop]
+
+        # Calculate x toe statistics normalized to hip x
+        slice_toe_x = step_slice['ToeTip_x'] - step_slice['Hip_x']
+        toe_tip_x_max.append(slice_toe_x.max())
+        toe_tip_x_min.append(slice_toe_x.min())
+        toe_tip_x_end.append(slice_toe_x.iloc[-1])
+        toe_tip_x_excursion.append(slice_toe_x.max() - slice_toe_x.min())
+
+        # Calculate y toe & crest statistics
+        toe_tip_y_max.append(step_slice['ToeTip_y'].max())
+        iliac_crest_y_max.append(step_slice['IliacCrest_y'].max())
+        iliac_crest_y_min.append(step_slice['IliacCrest_y'].min())
+        iliac_crest_y_excursion.append(step_slice['IliacCrest_y'].max() - step_slice['IliacCrest_y'].min())
+
+    # Assign the calculated statistics back to the DataFrame
+    step_table['ToeTip_x_max'] = toe_tip_x_max
+    step_table['ToeTip_x_min'] = toe_tip_x_min
+    step_table['ToeTip_x_end'] = toe_tip_x_end
+    step_table['ToeTip_x_excursion'] = toe_tip_x_excursion
+    step_table['ToeTip_y_max'] = toe_tip_y_max
+    step_table['IliacCrest_y_max'] = iliac_crest_y_max
+    step_table['IliacCrest_y_min'] = iliac_crest_y_min
+    step_table['IliacCrest_y_excursion'] = iliac_crest_y_excursion
+
+    return step_table
 
 def get_step_data(h5_path, phase_path):
     #gets stepcyclewise data for each trial
@@ -178,8 +222,12 @@ def get_step_data(h5_path, phase_path):
     #combine step data from phase with indices corresponding to h5
     stepwise_table = pd.concat((cycle_df, indices), axis = 1)
 
-    #add columns for second swing to allow slicing for stance then swing steps
+    #add columns for second swing to allow slicing for stance then swing steps (toe off alignment)
     step_table = add_second_swing(stepwise_table)
+
+    #add x and y stats
+    key = 'df_kinematics'
+    step_table = add_discrete_stats(step_table, key)
 
     return step_table
 
