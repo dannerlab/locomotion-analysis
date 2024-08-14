@@ -12,7 +12,7 @@ def import_kinematics(file):
     kinematics_df = pd.read_hdf(file, key)
     return kinematics_df
 
-def add_discrete_stats(step_table):
+def add_position_stats(step_table):
 
     toe_tip_x_max = []
     toe_tip_x_min = []
@@ -37,22 +37,40 @@ def add_discrete_stats(step_table):
         toe_tip_x_max.append(slice_toe_x.max())
         toe_tip_x_min.append(slice_toe_x.min())
         toe_tip_x_end.append(slice_toe_x.iloc[-1])
-        toe_tip_x_excursion.append(slice_toe_x.max() - slice_toe_x.min())
 
         # Calculate y toe & crest statistics
         toe_tip_y_max.append(step_slice['ToeTip_y'].max())
         iliac_crest_y_max.append(step_slice['IliacCrest_y'].max())
         iliac_crest_y_min.append(step_slice['IliacCrest_y'].min())
-        iliac_crest_y_excursion.append(step_slice['IliacCrest_y'].max() - step_slice['IliacCrest_y'].min())
 
     # Assign the calculated statistics back to the DataFrame
-    step_table['ToeTip_x_max'] = toe_tip_x_max
-    step_table['ToeTip_x_min'] = toe_tip_x_min
-    step_table['ToeTip_x_end'] = toe_tip_x_end
-    step_table['ToeTip_x_excursion'] = toe_tip_x_excursion
-    step_table['ToeTip_y_max'] = toe_tip_y_max
-    step_table['IliacCrest_y_max'] = iliac_crest_y_max
-    step_table['IliacCrest_y_min'] = iliac_crest_y_min
-    step_table['IliacCrest_y_excursion'] = iliac_crest_y_excursion
+    step_table['ToeTip-x-max'] = toe_tip_x_max
+    step_table['ToeTip-x-min'] = toe_tip_x_min
+    step_table['ToeTip-x-end'] = toe_tip_x_end
+
+    step_table['ToeTip-y-max'] = toe_tip_y_max
+    step_table['IliacCrest-y-max'] = iliac_crest_y_max
+    step_table['IliacCrest-y-max'] = iliac_crest_y_min
+
 
     return step_table
+
+def calc_discrete_stats(step_table):
+    step_table['ToeTip-x-excursion'] = step_table['ToeTip-x-max'] - step_table['ToeTip-x-min']
+    step_table['IliacCrest-y-excursion'] = step_table['IliacCrest-y-max'] - step_table['IliacCrest-y-max']
+    step_table['step-duration'] = step_table['stance-stop'] - step_table['swing-start']
+    step_table['cycle-velocity'] = (step_table['ToeTip-x-end'] - step_table['ToeTip-x-max']) + step_table['belt-speed'] * step_table['swing-duration'] / step_table['step-duration']
+    step_table['duty-factor'] = (step_table['stance-duration']) / (step_table['step-duration'])
+    step_table['stride-length'] = (step_table['ToeTip-x-end'] - step_table['ToeTip-x-min']) + step_table['belt-speed'] * step_table['swing-duration']
+
+    return step_table
+
+def main():
+    #this is for testing the functions
+    step_table = pd.read_csv("Sample_data/step_table.csv")
+    step_table_updated = calc_discrete_stats(step_table)
+    print(step_table_updated.columns)
+    print(step_table_updated.iloc[:15, -5:])
+
+if __name__ == "__main__":
+    main()
