@@ -198,9 +198,9 @@ def step_table_initialize(h5_dirs):
         if trialname_h5 == trailname_phase:
             trial_data = get_trial_data(h5_path, belt_speed)
             step_table = get_step_data(h5_path, phase_path, trial_data)
-            step_table = add_second_swing(step_table)
-            step_table = add_position_stats(step_table)
-            step_table = calc_discrete_stats(step_table)
+            #step_table = add_second_swing(step_table)
+            #step_table = add_position_stats(step_table)
+            #step_table = calc_discrete_stats(step_table)
             step_dfs_by_trial.append(step_table)
         else:
             print(f'file mismatch: \nh5: {trialname_h5}, phase: {trailname_phase}')
