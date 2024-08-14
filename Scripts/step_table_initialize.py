@@ -7,7 +7,7 @@ import os, glob
 import pandas as pd
 import numpy as np
 import IPython
-from stepwise_data_calc import add_position_stats, calc_discrete_stats
+from stepwise_data_calc import add_position_stats, calc_discrete_stats, add_second_swing, calc_joint_angle_stats
 
 #Helper functions
 
@@ -170,26 +170,11 @@ def get_step_data(h5_path, phase_path, trial_data):
     return cycle_df
 
 
-def add_second_swing(step_table):
-    #adds columns to facilitate easy selection of steps that consist of a stance phase followed by a swing phase
-    #recommend using this rather than indexing through each time because it handles mouse & trial separation
-
-    swing_cols = ['swing-start', 'swing-stop', 'swing-duration', 'swing-start-idx', 'swing-stop-idx']
-
-    second_step_table = pd.DataFrame()
-    for mouse_id in step_table['mouse-id'].unique():
-        for trial in step_table['trial-number'].unique():
-            mouse_id_trial_df = step_table[(step_table['mouse-id'] == mouse_id) & (step_table['trial-number'] == trial)] #selects all steps from one trial
-            mouse_id_trial_df_second = mouse_id_trial_df.copy()
-            for col in swing_cols:
-                mouse_id_trial_df_second[f'second-{col}'] = mouse_id_trial_df[col].shift(-1) #.shift(-1) shifts the column values up by one and fills with NaN
-            second_step_table = pd.concat([second_step_table, mouse_id_trial_df_second], ignore_index=True)
-    return second_step_table
-
 def step_table_initialize(h5_dirs):
 
     phase_paths, h5_paths = get_paths(h5_dirs)
     belt_speed = 15 #cm/s
+    joint_angles = ["Hip_angle", "Knee_angle", "Ankle_angle", "MTP_angle"]
 
     step_dfs_by_trial = []
     for h5_path, phase_path in zip(h5_paths, phase_paths):
@@ -201,6 +186,7 @@ def step_table_initialize(h5_dirs):
             step_table = add_second_swing(step_table)
             step_table = add_position_stats(step_table)
             step_table = calc_discrete_stats(step_table)
+            step_table = calc_joint_angle_stats(step_table, joint_angles)
             step_dfs_by_trial.append(step_table)
         else:
             print(f'file mismatch: \nh5: {trialname_h5}, phase: {trailname_phase}')
