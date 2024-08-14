@@ -13,46 +13,25 @@ def import_kinematics(file):
     kinematics_df = pd.read_hdf(file, key)
     return kinematics_df
 
-def add_position_stats(step_table):
+def add_position_stats(step_table, slicing_dict):
 
-    toe_tip_x_max = []
-    toe_tip_x_min = []
-    toe_tip_x_end = []
-    toe_tip_x_excursion = []
-    toe_tip_y_max = []
-    iliac_crest_y_max = []
-    iliac_crest_y_min = []
-    iliac_crest_y_excursion = []
+    stats = ['ToeTip_x', 'ToeTip_y', 'IliacCrest_y']
 
-    for step_i, trial in step_table.iterrows():
-        h5_path = trial['source-data-h5-path']
+    for step_i, step in step_table.iterrows():
+        h5_path = step['source-data-h5-path']
         h5_df = import_kinematics(h5_path)
 
-        # Get step slice
-        start = trial['swing-start-idx']
-        stop = trial['stance-stop-idx']
-        step_slice = h5_df[start:stop]
+        for phase in slicing_dict:
+            # Get step slice
+            start = step[slicing_dict[phase][0]]
+            stop = step[slicing_dict[phase][1]]
+            step_slice = h5_df[start:stop]
 
-        # Calculate x toe statistics normalized to hip x
-        slice_toe_x = step_slice['ToeTip_x'] - step_slice['Hip_x']
-        toe_tip_x_max.append(slice_toe_x.max())
-        toe_tip_x_min.append(slice_toe_x.min())
-        toe_tip_x_end.append(slice_toe_x.iloc[-1])
-
-        # Calculate y toe & crest statistics
-        toe_tip_y_max.append(step_slice['ToeTip_y'].max())
-        iliac_crest_y_max.append(step_slice['IliacCrest_y'].max())
-        iliac_crest_y_min.append(step_slice['IliacCrest_y'].min())
-
-    # Assign the calculated statistics back to the DataFrame
-    step_table['ToeTip-x-max'] = toe_tip_x_max
-    step_table['ToeTip-x-min'] = toe_tip_x_min
-    step_table['ToeTip-x-end'] = toe_tip_x_end
-
-    step_table['ToeTip-y-max'] = toe_tip_y_max
-    step_table['IliacCrest-y-max'] = iliac_crest_y_max
-    step_table['IliacCrest-y-max'] = iliac_crest_y_min
-
+            for stat in stats:
+                step_table.at[step_i, f'{phase}-{stat}-min'] = min(step_slice[stat])
+                step_table.at[step_i, f'{phase}-{stat}-max'] = max(step_slice[stat])
+                step_table[f'{phase}-{stat}-end'] = step_slice[stat].iloc[-1]
+                step_table[f'{phase}-{stat}-excursion'] = step_table[f'{phase}-{stat}-max'] - step_table[f'{phase}-{stat}-min']
 
     return step_table
 
@@ -74,38 +53,30 @@ def add_second_swing(step_table):
     return second_step_table
 
 
-def calc_discrete_stats(step_table):
-    step_table['ToeTip-x-excursion'] = step_table['ToeTip-x-max'] - step_table['ToeTip-x-min']
-    step_table['IliacCrest-y-excursion'] = step_table['IliacCrest-y-max'] - step_table['IliacCrest-y-max']
+def calc_discrete_stats(step_table, slicing_dict):
+    step_table = add_position_stats(step_table, slicing_dict)
+
     step_table['step-duration'] = step_table['stance-stop'] - step_table['swing-start']
-    step_table['cycle-velocity'] = (step_table['ToeTip-x-end'] - step_table['ToeTip-x-max']) + step_table['belt-speed'] * step_table['swing-duration'] / step_table['step-duration']
+
+    phase0 = list(slicing_dict.keys())[0]
+    step_table['cycle-velocity'] = (step_table[f'{phase0}-ToeTip_x-end'] - step_table[f'{phase0}-ToeTip_x-max']) + step_table['belt-speed'] * step_table['swing-duration'] / step_table['step-duration']
     step_table['duty-factor'] = (step_table['stance-duration']) / (step_table['step-duration'])
-    step_table['stride-length'] = (step_table['ToeTip-x-end'] - step_table['ToeTip-x-min']) + step_table['belt-speed'] * step_table['swing-duration']
+    step_table['stride-length'] = (step_table[f'{phase0}-ToeTip_x-end'] - step_table[f'{phase0}-ToeTip_x-min']) + step_table['belt-speed'] * step_table['swing-duration']
 
     return step_table
 
-def calc_joint_angle_stats(step_table, joint_angles):
-    slicing_dict = {"step-idx": ['swing-start-idx', 'stance-stop-idx'],
-                    "swing-idx": ['swing-start-idx', 'swing-stop-idx'],
-                    "stance-idx": ['stance-start-idx', 'stance-stop-idx'],
-                    #"step-toe-touch-idx": ['stance-start-idx', 'second-swing-stop-idx'],
-                    #"e1",
-                    #"e2",
-                    #"e3",
-                    #"e4"
-                    }
+def calc_joint_angle_stats(step_table, joint_angles, slicing_dict):
 
     error_steps = []
 
-    for step_i, trial in step_table.iterrows():
-        h5_path = trial['source-data-h5-path']
+    for step_i, step in step_table.iterrows():
+        h5_path = step['source-data-h5-path']
         h5_df = import_kinematics(h5_path)
         for phase in slicing_dict:
             # Get step slice
-            start = trial[slicing_dict[phase][0]]
-            stop = trial[slicing_dict[phase][1]]
+            start = step[slicing_dict[phase][0]]
+            stop = step[slicing_dict[phase][1]]
             step_slice = h5_df[start:stop]
-            trial2 = trial.copy()
 
             for joint in joint_angles:
                 try:
@@ -122,15 +93,45 @@ def calc_joint_angle_stats(step_table, joint_angles):
 
     return step_table
 
+def calc_segmental_stats(step_table, segment_dict, slicing_dict):
+    #calculate_segmental_angles from segmental_calc must have been run on all h5s or this will not work
+    for step_i, step in step_table.iterrows():
+        h5_path = step['source-data-h5-path']
+        h5_df = import_kinematics(h5_path)
+        for phase in slicing_dict:
+            # Get step slice
+            start = step[slicing_dict[phase][0]]
+            stop = step[slicing_dict[phase][1]]
+            step_slice = h5_df[start:stop]
+
+            for segment in segment_dict:
+                step_table.at[step_i, f'{phase}-{segment}-min'] = min(step_slice[f'{segment}_angle'])
+                step_table.at[step_i, f'{phase}-{segment}-max'] = max(step_slice[f'{segment}_angle'])
+                step_table[ f'{phase}-{segment}-excursion'] = step_table[f'{phase}-{segment}-max'] - step_table[f'{phase}-{segment}-min']
+
+    return step_table
 
 
 def main():
     #this is for testing the functions
     step_table = pd.read_csv("Sample_data/step_table.csv")
     joint_angles = ["Hip_angle", "Knee_angle", "Ankle_angle", "MTP_angle"]
-    step_table_updated = calc_joint_angle_stats(step_table, joint_angles)
+    segment_dict = {"Crest": ["IliacCrest", "Hip"],
+                    "Thigh": ["Hip", "Knee"],
+                    "Shank": ["Knee", "Ankle"]}
+    slicing_dict = {"step": ['swing-start-idx', 'stance-stop-idx'],
+                    "swing": ['swing-start-idx', 'swing-stop-idx'],
+                    "stance": ['stance-start-idx', 'stance-stop-idx'],
+                    #"step-toe-touch-idx": ['stance-start-idx', 'second-swing-stop-idx'],
+                    #"e1",
+                    #"e2",
+                    #"e3",
+                    #"e4"
+                    }
+    step_table_updated = calc_segmental_stats(step_table, segment_dict, slicing_dict)
     print(step_table_updated.columns)
     print(step_table_updated.iloc[:15, -5:])
+    print(step_table_updated.shape)
 
 if __name__ == "__main__":
     main()
