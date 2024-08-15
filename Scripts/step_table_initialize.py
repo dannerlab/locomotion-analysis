@@ -129,8 +129,8 @@ def get_step_data(h5_path, phase_path, trial_data):
             'stance-stop': stance_stops,
             'stance-duration': empty_list,
             'swing-duration': empty_list,
-            'include-stance': empty_list, #user-defined, from phase
-            'include-swing': empty_list,
+            #'include-stance': empty_list, #user-defined, from phase
+            #'include-swing': empty_list,
             'swing-start-idx': empty_list, #from h5 matching
             'swing-stop-idx': empty_list,
             'stance-start-idx': empty_list,
