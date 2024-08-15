@@ -9,17 +9,9 @@ import numpy as np
 import IPython
 from stepwise_data_calc import add_position_stats, calc_discrete_stats, add_second_swing, calc_joint_angle_stats, calc_segmental_stats
 from segmental_calc import calculate_segmental_angles
+from import_kinematics import import_kinematics
 
 #Helper functions
-
-def import_kinematics(file):
-    #imports the kinematics portion of the hdf
-    if not os.path.exists(file):
-        print(f"File not found: {file}")
-        return None
-    key = 'df_kinematics'
-    kinematics_df = pd.read_hdf(file, key)
-    return kinematics_df
 
 def closest(list, num):
     list = np.asarray(list)
@@ -183,10 +175,10 @@ def step_table_initialize(h5_dirs):
                     "swing": ['swing-start-idx', 'swing-stop-idx'],
                     "stance": ['stance-start-idx', 'stance-stop-idx'],
                     #"step-toe-touch-idx": ['stance-start-idx', 'second-swing-stop-idx'],
-                    #"e1",
-                    #"e2",
-                    #"e3",
-                    #"e4"
+                    #"f": ['swing-start-idx', 'peak-swing-idx'],
+                    #"e1": ['peak-swing-idx', 'stance-start-idx'],
+                    #"e2": ['stance-start-idx', 'trough-stance-idx'],
+                    #"e3": ['trough-stance-idx', 'stance-stop-idx'],
                     }
 
 
