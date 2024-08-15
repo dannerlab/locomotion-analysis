@@ -4,3 +4,4 @@
 Sample_data/step_table.csv
 *.pyc
 Sample_data/animal_avg_&_stdv.csv
+Sample_data/ANOVA_results.csv
