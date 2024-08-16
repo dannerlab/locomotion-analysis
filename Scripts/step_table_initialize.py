@@ -213,7 +213,9 @@ def main():
 
     #save
     save_dir = os.path.split(os.path.split(h5_dirs[0])[0])[0]
-    step_table.to_csv(os.path.join(save_dir, 'step_table.csv'))
+    save_name = os.path.join(save_dir, 'step_table.csv')
+    step_table.to_csv(save_name)
+    print(f"saved to: {save_name}")
 
 
 if __name__ == "__main__":
