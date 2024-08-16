@@ -145,7 +145,7 @@ def save_results(results_df, step_table_path):
     save_dir = os.path.split(step_table_path)[0]
     save_name = os.path.join(save_dir, "animal_avg_&_stdv.csv")
     results_df.to_csv(save_name)
-    print(f"saved: {save_name}")
+    print(f"saved to: {save_name}")
 
 
 
