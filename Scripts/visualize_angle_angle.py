@@ -3,7 +3,7 @@ Gets ankle phase times
 """
 import pandas as pd
 import numpy as np
-from import_kinematics import import_kinematics
+from Scripts.useful_imports import import_kinematics
 import seaborn as sns
 import matplotlib.pyplot as plt
 
