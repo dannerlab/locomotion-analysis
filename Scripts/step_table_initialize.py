@@ -9,7 +9,7 @@ import numpy as np
 import IPython
 from stepwise_data_calc import add_position_stats, calc_discrete_stats, add_second_swing, calc_joint_angle_stats, calc_segmental_stats
 from segmental_calc import calculate_segmental_angles
-from import_kinematics import import_kinematics
+from Scripts.useful_imports import import_kinematics
 
 #Helper functions
 
