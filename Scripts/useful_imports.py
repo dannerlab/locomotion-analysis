@@ -16,7 +16,6 @@ def import_kinematics(file):
 def get_numeric_col_names():
     selected_col_names = ['stance-duration',
                     'swing-duration',
-                    "second-swing-duration",
                     "step-ToeTip_x-min",
                     "step-ToeTip_x-max",
                     "step-ToeTip_x-end",
