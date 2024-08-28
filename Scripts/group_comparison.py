@@ -79,6 +79,9 @@ def shapiro_and_k(standardized_residuals, alpha):
         else:
             normal_stats[key] = [shapiro_normal[key], k_normal[key]]
 
+    #convert to dict
+    normal_stats = pd.DataFrame(normal_stats, index=['shapiro_p', 'kolmogorov-smirnov_p'])
+    non_normal_stats = pd.DataFrame(non_normal_stats, index=['shapiro_p', 'kolmogorov-smirnov_p'])
     return normal_stats, non_normal_stats
 
 def calc_anova(step_table_grouped, selected_stats, alpha):
@@ -139,13 +142,12 @@ def compare_groups(step_table_fp, alpha):
     standardized_residuals = standardize_residuals(step_table_grouped, selected_stats)
 
     #calculate normalcy of residuals
-    ##This may not actually be what I want. Might be better to calculate normalcy of data itself
     normal_stats, non_normal_stats = shapiro_and_k(standardized_residuals, alpha)
 
     #homogeneity of variance: one way p
     one_way_p = calc_anova(step_table_grouped, selected_stats, alpha)
 
-    return one_way_p
+    return normal_stats, non_normal_stats, one_way_p
 
 
 def main():
@@ -154,11 +156,19 @@ def main():
     step_table_fp = 'Sample_data/step_table.csv'
     alpha = 0.05
 
-    one_way_p = compare_groups(step_table_fp, alpha)
+    normal_stats, non_normal_stats, one_way_p = compare_groups(step_table_fp, alpha)
 
-    save_name = os.path.join(os.path.split(animal_stats_fp)[0],'ANOVA_results.csv')
-    one_way_p.to_csv(save_name)
-    print(f'saved to: {save_name}')
+    save_location = os.path.split(animal_stats_fp)[0]
+
+    normal_save_name = os.path.join(save_location, 'normal_stats.csv')
+    normal_stats.to_csv(normal_save_name)
+    non_normal_save_name = os.path.join(save_location, 'non_normal_stats.csv')
+    non_normal_stats.to_csv(non_normal_save_name)
+
+    anova_save_name = os.path.join(save_location,'ANOVA_results.csv')
+    one_way_p.to_csv(anova_save_name)
+
+    print(f'saved to: {save_location}')
 
     return
 
