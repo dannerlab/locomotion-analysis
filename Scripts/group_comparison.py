@@ -4,10 +4,7 @@ needs filtering still
 """
 
 import pandas as pd
-from statsmodels.formula.api import ols
-import statsmodels.api as sm
 import os
-import IPython
 from scipy.stats import shapiro
 from scipy.stats import f_oneway
 import scipy.stats as stats
@@ -23,27 +20,35 @@ def combine_dicts(*dicts): #GitHub Co-pilot assistance
 
     return combined_dict
 
-def compare_groups_means(animal_stats_fp):
-    animal_stats = pd.read_csv(animal_stats_fp)
-    animal_stats_grouped = animal_stats.groupby(['mouse-type', 'exp-type'])
-    stats = animal_stats.filter(like='avg-').columns
-    group_names = list(animal_stats_grouped.groups.keys())
 
-    results_df = pd.DataFrame()
-    for stat in stats:
-        independent_vars = ['mouse-type', 'exp-type']
-        dependent_var = stat
-        #test normal distribution (shapiro-wilkes & KGsmirnov)
+def standardize_residuals(step_table_grouped, selected_stats):
+    #combined residuals
+    ##calculate residuals for each statistic and store in residuals dict
+    residuals = {group: {} for group in step_table_grouped.groups.keys()}
+    ##residuals dict is formatted as: {group: {stat: residuals col}}
+    for group, data in step_table_grouped:
+        selected_data = data[selected_stats]
+        for col in selected_data:
+            col_mean = np.mean(selected_data[col])
+            col_residual = selected_data[col] - col_mean
+            residuals[group][col] = list(col_residual)
 
-        #if fail that run other tests
-        model = ols(f"animal_stats['{stat}'] ~ C(animal_stats[independent_vars[0]])", data=animal_stats).fit()
-        anova_table = sm.stats.anova_lm(model, typ=2)
-        anova_series = anova_table.stack()
-        anova_series.name = stat
-        results_df = results_df._append(anova_series)
-        #print(f"ANOVA results for {stat}:\n", anova_table)
+    combined_residuals = combine_dicts(*residuals.values()) #extracts so they are no longer by group
 
-    return results_df
+    #standardized residuals
+    ##find stdv of residuals for all stats
+    stdv_residuals = pd.Series(index=combined_residuals.keys())
+    for stat in combined_residuals:
+        stat_stdv = np.nanstd(combined_residuals[stat]) #ignores NaN values
+        stdv_residuals.loc[stat] = stat_stdv
+
+    ##standardize the residuals
+    standardized_residuals = pd.DataFrame(columns=combined_residuals.keys())
+    for key in combined_residuals:
+        standardized_residuals[key] = combined_residuals[key] / stdv_residuals[key]
+
+    return standardized_residuals
+
 
 def shapiro_and_k(standardized_residuals, alpha):
     #tests for normalcy
@@ -84,6 +89,7 @@ def shapiro_and_k(standardized_residuals, alpha):
     non_normal_stats = pd.DataFrame(non_normal_stats, index=['shapiro_p', 'kolmogorov-smirnov_p'])
     return normal_stats, non_normal_stats
 
+
 def calc_anova(step_table_grouped, selected_stats, alpha):
     list_of_selected_groups = []
     for group, data in step_table_grouped:
@@ -106,35 +112,24 @@ def calc_anova(step_table_grouped, selected_stats, alpha):
 
     return one_way_p
 
-def standardize_residuals(step_table_grouped, selected_stats):
-    #combined residuals
-    ##calculate residuals for each statistic and store in residuals dict
-    residuals = {group: {} for group in step_table_grouped.groups.keys()}
-    ##residuals dict is formatted as: {group: {stat: residuals col}}
-    for group, data in step_table_grouped:
-        selected_data = data[selected_stats]
-        for col in selected_data:
-            col_mean = np.mean(selected_data[col])
-            col_residual = selected_data[col] - col_mean
-            residuals[group][col] = list(col_residual)
 
-    combined_residuals = combine_dicts(*residuals.values()) #extracts so they are no longer by group
+def compare_animal_means(animal_stats_fp, alpha):
+    '''Runs stats on avgs of each animal (Han style)'''
+    animal_stats = pd.read_csv(animal_stats_fp)
+    animal_stats_grouped = animal_stats.groupby(['mouse-type', 'exp-type'])
+    stats = animal_stats.filter(like='avg-').columns
+    #since col names for avgs all begin with avg, cannot use get_numeric_col_names()
+    #that is ok because get_numeric_col_names() is used to generate this table so re-running will update here also
 
-    #standardized residuals
-    ##find stdv of residuals for all stats
-    stdv_residuals = pd.Series(index=combined_residuals.keys())
-    for stat in combined_residuals:
-        stat_stdv = np.nanstd(combined_residuals[stat]) #ignores NaN values
-        stdv_residuals.loc[stat] = stat_stdv
+    standardized_animal_grouped = standardize_residuals(animal_stats_grouped, stats)
+    normal, non_normal = shapiro_and_k(standardized_animal_grouped, alpha)
+    one_way_p_animal = calc_anova(animal_stats_grouped, stats, alpha)
 
-    ##standardize the residuals
-    standardized_residuals = pd.DataFrame(columns=combined_residuals.keys())
-    for key in combined_residuals:
-        standardized_residuals[key] = combined_residuals[key] / stdv_residuals[key]
+    return normal, non_normal, one_way_p_animal
 
-    return standardized_residuals
 
-def compare_groups(step_table_fp, alpha):
+def compare_step_cycles(step_table_fp, alpha):
+    """ Compares 2+ groups based on step cycle level data """
     step_table = pd.read_csv(step_table_fp)
     step_table_grouped = step_table.groupby(['mouse-type', 'exp-type'])
     selected_stats = get_numeric_col_names() #gets names of the columns that it makes sense to run these tests on
@@ -150,25 +145,37 @@ def compare_groups(step_table_fp, alpha):
     return normal_stats, non_normal_stats, one_way_p
 
 
-def main():
-    animal_stats_fp = 'Sample_data/animal_avg_&_stdv.csv' #should use step_table.csv
-    mean_results = compare_groups_means(animal_stats_fp)
-    step_table_fp = 'Sample_data/step_table.csv'
-    alpha = 0.05
+def save(fp, normal, non_normal, anova, name):
+    if name != "":
+        name += "_"
 
-    normal_stats, non_normal_stats, one_way_p = compare_groups(step_table_fp, alpha)
+    save_location = os.path.join(os.path.split(fp)[0], 'group_results')
+    if not os.path.exists(save_location):
+        os.makedirs(save_location)
 
-    save_location = os.path.split(animal_stats_fp)[0]
+    normal_save_name = os.path.join(save_location, f'{name}normal_stats.csv')
+    non_normal_save_name = os.path.join(save_location, f'{name}non_normal_stats.csv')
+    anova_save_name = os.path.join(save_location, f'{name}ANOVA_results.csv')
 
-    normal_save_name = os.path.join(save_location, 'normal_stats.csv')
-    normal_stats.to_csv(normal_save_name)
-    non_normal_save_name = os.path.join(save_location, 'non_normal_stats.csv')
-    non_normal_stats.to_csv(non_normal_save_name)
-
-    anova_save_name = os.path.join(save_location,'ANOVA_results.csv')
-    one_way_p.to_csv(anova_save_name)
+    normal.to_csv(normal_save_name)
+    non_normal.to_csv(non_normal_save_name)
+    anova.to_csv(anova_save_name)
 
     print(f'saved to: {save_location}')
+
+
+def main():
+    alpha = 0.05
+
+    #by animal
+    animal_stats_fp = 'Sample_data/animal_avg_&_stdv.csv'
+    normal_animal, non_normal_animal, anova_animal = compare_animal_means(animal_stats_fp, alpha)
+    save(animal_stats_fp, normal_animal, non_normal_animal, anova_animal, "animal")
+
+    #by step cycle
+    step_table_fp = 'Sample_data/step_table.csv'
+    normal_stats, non_normal_stats, one_way_p = compare_step_cycles(step_table_fp, alpha)
+    save(step_table_fp, normal_stats, non_normal_stats, one_way_p, "")
 
     return
 
