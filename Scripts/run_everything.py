@@ -7,8 +7,17 @@ re-runs all scripts to generate:
 
 import os
 
-os.system('python Scripts/step_table_initialize.py')
+#make it work on Windows & Linux
+scripts_dir = os.path.join('Scripts')
+batch_convert = os.path.join(scripts_dir, 'batch_convert.py')
+step_table_initialize = os.path.join(scripts_dir, 'step_table_initialize.py')
+animal_avgs = os.path.join(scripts_dir, 'animal_avgs.py')
+group_comparison = os.path.join(scripts_dir, 'group_comparison.py')
 
-os.system('python Scripts/animal_avgs.py')
+os.system(f'python {batch_convert}')
 
-os.system('python Scripts/group_comparison.py')
+os.system(f'python {step_table_initialize}')
+
+os.system(f'python {animal_avgs}')
+
+os.system(f'python {group_comparison}')
