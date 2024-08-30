@@ -180,7 +180,7 @@ if __name__ == "__main__":
     save_folder = os.path.join(parent_folder, "h5")
     if not os.path.exists(save_folder):
         os.makedirs(save_folder, exist_ok=True)
-    save_name = os.path.join(save_folder, options.filename.split('/')[-1][:-3]+'h5')
+    save_name = os.path.join(save_folder, os.path.split(options.filename)[-1][:-4] +'.h5')
 
     if file_ending == 'smr':
         df_kinematics, df_emg, ev_chs = load_spike2(options.filename)
