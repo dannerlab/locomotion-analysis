@@ -3,11 +3,11 @@ Take existing data files (csv/phase, h5) and make one large table
 with trialwise & step data
 also add discrete stats for x and y positions
 """
-import os, glob
+import os
+import glob
 import pandas as pd
 import numpy as np
-import IPython
-from stepwise_data_calc import add_position_stats, calc_discrete_stats, add_second_swing, calc_joint_angle_stats, calc_segmental_stats
+from stepwise_data_calc import calc_discrete_stats, add_second_swing, calc_joint_angle_stats, calc_segmental_stats
 from segmental_calc import calculate_segmental_angles
 from import_kinematics import import_kinematics
 
@@ -95,8 +95,8 @@ def get_trial_data(h5_path, belt_speed):
     return(trial_data)
 
 def get_step_data(h5_path, phase_path, trial_data):
+    '''get timing and corresponding indices per phase'''
     #this processes one trial
-    #get timing and corresponding indices per phase
     phase_df = pd.read_csv(phase_path)
     step_indices = []
     swing_starts = []
@@ -200,14 +200,18 @@ def step_table_initialize(h5_dirs):
             step_dfs_by_trial.append(step_table)
         else:
             print(f'file mismatch: \nh5: {trialname_h5}, phase: {trailname_phase}')
+
     step_table = pd.concat((step_dfs_by_trial), ignore_index = True)
 
     return step_table
 
 def main():
     #input
-    h5_dirs = ['Sample_data/V3Off_Levelwalk/h5',
-               'Sample_data/WT_Levelwalk/h5',]
+    groups = ['V3Off_Levelwalk', 'WT_Levelwalk']
+
+    h5_dirs = [os.path.join('Sample_data', group, 'h5') for group in groups]
+    for h5_dir in h5_dirs:
+        print(h5_dir)
     #run code
     step_table = step_table_initialize(h5_dirs)
 
