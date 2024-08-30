@@ -1,0 +1,8 @@
+python
+pandas
+neo #must pip install not conda install
+scipy
+pyyaml
+IPython
+tables
+statsmodels
