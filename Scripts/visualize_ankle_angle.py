@@ -1,5 +1,5 @@
 """
-Gets ankle phase times
+Graph ankle angle
 """
 import pandas as pd
 import numpy as np
