@@ -10,6 +10,7 @@ from scipy.stats import f_oneway
 import scipy.stats as stats
 import numpy as np
 from useful_imports import get_numeric_col_names
+import IPython
 
 def combine_dicts(*dicts): #GitHub Co-pilot assistance
     combined_dict = {}
@@ -82,7 +83,7 @@ def shapiro_and_k(standardized_residuals, alpha):
         elif key in k_non_normal.keys():
             non_normal_stats[key] = [shapiro_normal[key], k_non_normal[key]]
         else:
-            normal_stats[key] = [shapiro_normal[key], k_normal[key]]
+            normal_stats[key] = [shapiro_normal[key], k_normal[key]] #adds to normal stats iff both tests pass
 
     #convert to dict
     normal_stats = pd.DataFrame(normal_stats, index=['shapiro_p', 'kolmogorov-smirnov_p'])
@@ -96,19 +97,19 @@ def calc_anova(step_table_grouped, selected_stats, alpha):
         selected_data = data[selected_stats]
         list_of_selected_groups.append(selected_data)
 
-    one_way_p = {}
+    one_way_p_dict = {}
 
     for key in selected_stats:
         group_stats = [] #list of selected columns (via key) for each group
         for group in list_of_selected_groups:
             group_stats.append(group[key])
         p_val = f_oneway(*(group_stats))[1]
-        if p_val <= alpha: #filter for significance
-            one_way_p[key] = p_val
+        one_way_p_dict[key] = p_val
 
     #format for nicer saving
-    one_way_p = pd.Series(one_way_p.values(),index=one_way_p.keys()).to_frame()
-    one_way_p = one_way_p.rename(columns = {0: 'ANOVA_p_value'})
+    one_way_p_series = pd.Series(one_way_p_dict).sort_values()
+
+    one_way_p = one_way_p_series.to_frame(name = 'ANOVA_p_value')
 
     return one_way_p
 
