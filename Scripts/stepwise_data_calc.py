@@ -1,5 +1,7 @@
 
-
+"""
+has functions for adding data to step table, called by step_table_initialize
+"""
 import os
 import pandas as pd
 import IPython
@@ -113,7 +115,7 @@ def calc_segmental_stats(step_table, segment_dict, slicing_dict):
 
 
 def main():
-    #this is for testing the functions
+    #this is for testing the functions, should be called by step_table_initialize
     step_table = pd.read_csv("Sample_data/step_table.csv")
     joint_angles = ["Hip_angle", "Knee_angle", "Ankle_angle", "MTP_angle"]
     segment_dict = {"Crest": ["IliacCrest", "Hip"],

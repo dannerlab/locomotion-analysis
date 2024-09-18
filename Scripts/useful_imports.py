@@ -1,5 +1,5 @@
 """
-function for importing kinematics, column names
+function for importing kinematics, column names, 
 """
 import pandas as pd
 import os
