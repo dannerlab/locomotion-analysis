@@ -1,8 +1,9 @@
 """
-re-runs all scripts to generate:
+runs scripts to generate:
 - step_table.csv with stepwise stats
 - animal_avg_&_stdv.csv with avgs and stdvs
 - ANOVA_results.csv with group comparisons of the stats in animal_avg_&_stdv.csv
+requires h5s with adjusted knee angles, recommend using batch_convert.py followed by locoproc 
 """
 
 import os
@@ -14,7 +15,6 @@ step_table_initialize = os.path.join(scripts_dir, 'step_table_initialize.py')
 animal_avgs = os.path.join(scripts_dir, 'animal_avgs.py')
 group_comparison = os.path.join(scripts_dir, 'group_comparison.py')
 
-os.system(f'python {batch_convert}')
 
 os.system(f'python {step_table_initialize}')
 
