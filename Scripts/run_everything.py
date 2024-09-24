@@ -14,6 +14,7 @@ batch_convert = os.path.join(scripts_dir, 'batch_convert.py')
 step_table_initialize = os.path.join(scripts_dir, 'step_table_initialize.py')
 animal_avgs = os.path.join(scripts_dir, 'animal_avgs.py')
 group_comparison = os.path.join(scripts_dir, 'group_comparison.py')
+stick_plots = os.path.join(scripts_dir, 'stick_plots.py')
 
 
 os.system(f'python {step_table_initialize}')
@@ -21,3 +22,5 @@ os.system(f'python {step_table_initialize}')
 os.system(f'python {animal_avgs}')
 
 os.system(f'python {group_comparison}')
+
+os.system(f'python {stick_plots}')
