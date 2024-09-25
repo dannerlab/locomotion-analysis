@@ -3,14 +3,16 @@ Take existing data files (csv/phase, h5) and make one large table
 with trialwise & step data
 also add discrete stats for x and y positions
 """
-import os
+import os, warnings
 import glob
 import pandas as pd
 import numpy as np
 from stepwise_data_calc import calc_discrete_stats, add_second_swing, calc_joint_angle_stats, calc_segmental_stats
 from segmental_calc import calculate_segmental_angles
-from Scripts.useful_imports import import_kinematics
+from useful_imports import import_kinematics
 
+#suppress PerformanceWarning so it stops warning about fragmented DataFrame
+warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
 #Helper functions
 
 def closest(list, num):
