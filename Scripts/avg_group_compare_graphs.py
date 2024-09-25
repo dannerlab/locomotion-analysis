@@ -7,10 +7,28 @@ import matplotlib.pyplot as plt
 import os
 import IPython
 
+def set_ylim(stat):
+
+    ylims = {
+        'duration': (0, 0.15),
+        'duty-factor': (0, 0.1),
+        'x-excursion': (0, 10),
+        'y-excursion': (0, 2),
+         }
+
+    for key in ylims.keys():
+        if key in stat:
+            ymin, ymax = ylims.get(key)
+            break
+        else:
+            ymin, ymax = (None, None)
+
+    return ymin, ymax
+
 def graph_stat(avg_table_path, stat):
     avg_table = pd.read_csv(avg_table_path)
     avg_table_grouped = avg_table.groupby(['mouse-type', 'exp-type'])
-    
+
     #make nice table for plotting from
     plot_data = []
     for group_name, group_df in avg_table_grouped:
@@ -24,6 +42,7 @@ def graph_stat(avg_table_path, stat):
     sns.boxplot(x = 'Group', y = 'Value', data = plot_df, hue = 'Group', palette = palette)
     sns.stripplot(x = 'Group', y = 'Value', data = plot_df, color = 'black', jitter = 0.2, size = 2.5)
     plt.title(f'{stat}')
+    plt.ylim(set_ylim(stat))
 
 
     #save plot
@@ -37,9 +56,11 @@ def graph_stat(avg_table_path, stat):
 def main():
     avg_table_path = 'Sample_data/animal_avg_&_stdv.csv'
     #step_table = pd.read_csv('step_table.csv')
-    stats = ['stance-duration', 'swing-duration', 
-            'step-ToeTip_x-excursion', 'step-ToeTip_y-excursion', 
-            'step-IliacCrest_y-excursion', 'duty-factor'] #add more stats, should match column labels for animal_avg_and_stdv.csv without the 'avg'/ 'stdv' prefix
+    stats = ['stance-duration', 'swing-duration', 'step-duration',
+            'step-ToeTip_x-excursion', 'step-ToeTip_y-excursion',
+            'step-IliacCrest_y-excursion',
+            'duty-factor'] #add more stats, should match column labels for animal_avg_and_stdv.csv without the 'avg'/ 'stdv' prefix
+                        #advised to adjust y limits when you add more stats
     for stat in stats:
         graph_stat(avg_table_path, stat)
     return
