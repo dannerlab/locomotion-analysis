@@ -3,7 +3,7 @@ runs scripts to generate:
 - step_table.csv with stepwise stats
 - animal_avg_&_stdv.csv with avgs and stdvs
 - ANOVA_results.csv with group comparisons of the stats in animal_avg_&_stdv.csv
-requires h5s with adjusted knee angles, recommend using batch_convert.py followed by locoproc 
+requires h5s with adjusted knee angles, recommend using batch_convert.py followed by locoproc
 """
 
 import os
@@ -15,6 +15,7 @@ step_table_initialize = os.path.join(scripts_dir, 'step_table_initialize.py')
 animal_avgs = os.path.join(scripts_dir, 'animal_avgs.py')
 group_comparison = os.path.join(scripts_dir, 'group_comparison.py')
 stick_plots = os.path.join(scripts_dir, 'stick_plots.py')
+avg_group_compare_graphs = os.path.join(scripts_dir, 'avg_group_compare_graphs.py')
 
 
 os.system(f'python {step_table_initialize}')
@@ -24,3 +25,5 @@ os.system(f'python {animal_avgs}')
 os.system(f'python {group_comparison}')
 
 os.system(f'python {stick_plots}')
+
+os.system(f'python{avg_group_compare_graphs}')
