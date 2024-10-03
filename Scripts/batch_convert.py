@@ -2,9 +2,8 @@
 
 import os
 
-def batch_convert(groups):
+def batch_convert(groups, data_folder):
 
-    data_folder = "Sample_data"
     dirs = []
     for group in groups:
         directory = f'{data_folder}/{group}/smr'
@@ -29,7 +28,8 @@ def batch_convert(groups):
 
 def main():
     groups = ["V3Off_Levelwalk", "WT_Levelwalk"]
-    batch_convert(groups)
+    data_folder = "Full_data" #"Sample_data"
+    batch_convert(groups, data_folder)
 
 if __name__ == "__main__":
     main()
