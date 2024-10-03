@@ -207,11 +207,11 @@ def step_table_initialize(h5_dirs):
 
     return step_table
 
-def main():
+def main(main_dir):
     #input
     groups = ['V3Off_Levelwalk', 'WT_Levelwalk']
 
-    h5_dirs = [os.path.join('Sample_data', group, 'h5') for group in groups]
+    h5_dirs = [os.path.join(main_dir, group, 'h5') for group in groups]
     for h5_dir in h5_dirs:
         print(h5_dir)
     #run code
@@ -225,4 +225,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main("Sample_data")
