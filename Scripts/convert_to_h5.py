@@ -1,5 +1,6 @@
 #from Locoproc under GNU Lesser Public License
 #Modifications made 8/13/2024 L. Schoenhals
+#Converts from smr to h5 and also generates phase files for use with locoproc
 
 import pandas as pd
 import numpy as np
@@ -8,6 +9,7 @@ import scipy.io as scio
 from optparse import OptionParser
 import yaml
 import os
+import scipy.signal as signal
 import IPython
 
 emgs = ['Left_TA','TA','LG','Left_GS','Right_TA','Right TA','Left GS','Right VL','GS','IP','ST','oTA', 'oST', 'oGS', 'oVL', 'oBF']
@@ -177,23 +179,27 @@ if __name__ == "__main__":
 
     file_ending = options.filename.split('.')[-1]
     parent_folder = os.path.dirname(os.path.dirname(options.filename)) #locomotion-analysis/Sample_data/V3Off_Levelwalk/smr/gp3m4_1.smr
-    save_folder = os.path.join(parent_folder, "h5")
+    save_folder = os.path.join(parent_folder, "h5_raw")
     if not os.path.exists(save_folder):
         os.makedirs(save_folder, exist_ok=True)
     save_name = os.path.join(save_folder, os.path.split(options.filename)[-1][:-4] +'.h5')
 
     if file_ending == 'smr':
         df_kinematics, df_emg, ev_chs = load_spike2(options.filename)
-
         ev_chs_toe_touch = []
         ev_chs_toe_off = []
         df_ev_chs = pd.DataFrame()
+
+
         if ('toetouch' in ev_chs.keys()) and ('toeoff' in ev_chs.keys()):
             for event in ev_chs['toetouch']: #'toetouch' should be changed so that it can update based on naming
                 ev_chs_toe_touch.append(event[1])
             for event in ev_chs['toeoff']: #same thing for 'toeoff'
                 ev_chs_toe_off.append(event[1])
-
+        elif ('Toe_touch' in df_kinematics.keys()) and ('Toe_off' in df_kinematics.keys()):
+                    ev_chs_toe_off = df_kinematics.time.iloc[signal.find_peaks(-1 * df_kinematics.Toe_off, distance = 6)[0]].tolist()
+                    ev_chs_toe_touch = df_kinematics.time.iloc[signal.find_peaks(-1 * df_kinematics.Toe_touch, distance = 6)[0]].tolist()
+        if ev_chs_toe_touch and ev_chs_toe_off:
             #pad lists to same length so they can be DFs
             max_len = max(len(ev_chs_toe_touch), len(ev_chs_toe_off))
             ev_chs_toe_touch += [None] * (max_len - len(ev_chs_toe_touch))
