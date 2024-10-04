@@ -10,6 +10,7 @@ import numpy as np
 from stepwise_data_calc import calc_discrete_stats, add_second_swing, calc_joint_angle_stats, calc_segmental_stats
 from segmental_calc import calculate_segmental_angles
 from useful_imports import import_kinematics
+import IPython
 
 #suppress PerformanceWarning so it stops warning about fragmented DataFrame
 warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
@@ -203,7 +204,10 @@ def step_table_initialize(h5_dirs):
         else:
             print(f'file mismatch: \nh5: {trialname_h5}, phase: {trailname_phase}')
 
+    # IPython.embed()
+    # gfhdsklj
     step_table = pd.concat((step_dfs_by_trial), ignore_index = True)
+
 
     return step_table
 
@@ -211,7 +215,7 @@ def main(main_dir):
     #input
     groups = ['V3Off_Levelwalk', 'WT_Levelwalk']
 
-    h5_dirs = [os.path.join(main_dir, group, 'h5') for group in groups]
+    h5_dirs = [os.path.join(main_dir, group, 'h5_knee_fixed') for group in groups]
     for h5_dir in h5_dirs:
         print(h5_dir)
     #run code
@@ -225,4 +229,4 @@ def main(main_dir):
 
 
 if __name__ == "__main__":
-    main("Sample_data")
+    main("Full_data")
