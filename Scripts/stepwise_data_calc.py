@@ -5,6 +5,7 @@ has functions for adding data to step table, called by step_table_initialize
 import os
 import pandas as pd
 import IPython
+import sys
 
 def import_kinematics(file):
     #imports the kinematics portion of the hdf
@@ -30,10 +31,24 @@ def add_position_stats(step_table, slicing_dict):
             step_slice = h5_df[start:stop]
 
             for stat in stats:
-                step_table.at[step_i, f'{phase}-{stat}-min'] = min(step_slice[stat])
-                step_table.at[step_i, f'{phase}-{stat}-max'] = max(step_slice[stat])
-                step_table[f'{phase}-{stat}-end'] = step_slice[stat].iloc[-1]
-                step_table[f'{phase}-{stat}-excursion'] = step_table[f'{phase}-{stat}-max'] - step_table[f'{phase}-{stat}-min']
+                try:
+                    #add the columns
+                    additional_cols = [f'{phase}-{stat}-min', f'{phase}-{stat}-max', f'{phase}-{stat}-end', f'{phase}-{stat}-excursion']
+                    for col in additional_cols:
+                        if col not in step_table.columns:
+                            step_table[col] = None
+
+                    step_table.at[step_i, f'{phase}-{stat}-min'] = min(step_slice[stat])
+                    step_table.at[step_i, f'{phase}-{stat}-max'] = max(step_slice[stat])
+                    step_table[f'{phase}-{stat}-end'] = step_slice[stat].iloc[-1]
+                    step_table[f'{phase}-{stat}-excursion'] = step_table[f'{phase}-{stat}-max'] - step_table[f'{phase}-{stat}-min']
+
+                except ValueError:
+                    print(ValueError)
+                    print(f'h5 path: {h5_path}')
+                    jfsedawldckf
+
+
 
     return step_table
 
