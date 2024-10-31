@@ -8,31 +8,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import os
 import IPython
-from useful_imports import import_kinematics
+from useful_imports import import_kinematics, get_rc_params
 
-rc_params = {
-    "figure.constrained_layout.use": False,
-    "figure.figsize": (6.75, 1.0),
-    "axes.linewidth": 0.5,
-    "grid.linewidth": 0.5,
-    # Axes
-    "axes.spines.right": False,
-    "axes.spines.top": False,
-    "axes.formatter.useoffset": False,
-    # Font sizes
-    "axes.labelsize": 7,
-    "xtick.labelsize": 7,
-    "ytick.labelsize": 7,
-    "legend.fontsize": 7,
-    "font.size": 7,
-    "lines.markersize": 1.0,
-    'xtick.major.pad': 1,
-    'ytick.major.pad': 1,
-    # save
-    "savefig.transparent": True,
-    "savefig.bbox": "tight",
-    "savefig.dpi": 200,
-}
+rc_params = get_rc_params
 plt.rcParams.update(rc_params)
 
 def plot_diagram(trial, main_dir):

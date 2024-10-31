@@ -120,3 +120,29 @@ def get_numeric_col_names():
                     "stance-Shank-max",
                     "stance-Shank-excursion"]
     return(selected_col_names)
+
+def get_rc_params():
+    rc_params = {
+        "figure.constrained_layout.use": False,
+        "figure.figsize": (6.75, 1.0),
+        "axes.linewidth": 0.5,
+        "grid.linewidth": 0.5,
+        # Axes
+        "axes.spines.right": False,
+        "axes.spines.top": False,
+        "axes.formatter.useoffset": False,
+        # Font sizes
+        "axes.labelsize": 7,
+        "xtick.labelsize": 7,
+        "ytick.labelsize": 7,
+        "legend.fontsize": 7,
+        "font.size": 7,
+        "lines.markersize": 1.0,
+        'xtick.major.pad': 1,
+        'ytick.major.pad': 1,
+        # save
+        "savefig.transparent": True,
+        "savefig.bbox": "tight",
+        "savefig.dpi": 200,
+    }
+    return rc_params
