@@ -61,9 +61,9 @@ def calc_discrete_stats(step_table, slicing_dict):
     step_table['step-duration'] = step_table['stance-stop'] - step_table['swing-start']
 
     phase0 = list(slicing_dict.keys())[0]
-    step_table['cycle-velocity'] = (step_table[f'{phase0}-ToeTip_x-end'] - step_table[f'{phase0}-ToeTip_x-max']) + step_table['belt-speed'] * step_table['swing-duration'] / step_table['step-duration']
+    step_table['cycle-velocity'] = (step_table[f'{phase0}-ToeTip_x-end'] - step_table[f'{phase0}-ToeTip_x-max']) + step_table['belt-speed'] * step_table['swing-duration'] / step_table['step-duration'] #this is probably wrong
     step_table['duty-factor'] = (step_table['stance-duration']) / (step_table['step-duration'])
-    step_table['stride-length'] = (step_table[f'{phase0}-ToeTip_x-end'] - step_table[f'{phase0}-ToeTip_x-min']) + step_table['belt-speed'] * step_table['swing-duration']
+    step_table['stride-length'] = (step_table[f'{phase0}-ToeTip_x-end'] - step_table[f'{phase0}-ToeTip_x-min']) + step_table['belt-speed'] * step_table['swing-duration'] #probably also off
 
     return step_table
 
