@@ -46,8 +46,8 @@ def save_results(results_df, step_table_path):
 
 
 
-def main():
-    step_table_path = "Sample_data/step_table.csv"
+def main(main_dir):
+    step_table_path = f"{main_dir}/step_table.csv"
     step_table = pd.read_csv(step_table_path)
 
     results_df = calc_avg(step_table)
@@ -55,4 +55,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main("Full_data")

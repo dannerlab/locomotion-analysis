@@ -53,8 +53,8 @@ def graph_stat(avg_table_path, stat):
     plt.savefig(os.path.join(save_path, save_name))
     plt.clf()
 
-def main():
-    avg_table_path = 'Sample_data/animal_avg_&_stdv.csv'
+def main(main_dir):
+    avg_table_path = f'{main_dir}/animal_avg_&_stdv.csv'
     #step_table = pd.read_csv('step_table.csv')
     stats = ['stance-duration', 'swing-duration', 'step-duration',
             'step-ToeTip_x-excursion', 'step-ToeTip_y-excursion',

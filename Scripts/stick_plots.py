@@ -35,7 +35,7 @@ rc_params = {
 }
 plt.rcParams.update(rc_params)
 
-def plot_diagram(trial):
+def plot_diagram(trial, main_dir):
     """generates stick diagram figure (one trial)"""
     fig, axs = plt.subplots()
 
@@ -133,22 +133,22 @@ def plot_diagram(trial):
         bbox_to_anchor=(0.05, -0.5),  # Adjust the position relative to axes max(distance_x)*-1e-3
     )
     axs.add_artist(scalebar_h)
-    save_location = 'Sample_data/stick_diagrams'
+    save_location = f'{main_dir}/stick_diagrams'
     if not os.path.exists(save_location):
         os.makedirs(save_location)
     save_name = f"stick_diagram_{trial['mouse-type'].iloc[0]}_{trial['exp-type'].iloc[0]}_{trial['mouse-id'].iloc[0]}_{trial['trial-number'].iloc[0]}.png"
     plt.savefig(os.path.join(save_location, save_name))
     plt.close()
 
-def main():
-    step_table = pd.read_csv("Sample_data/step_table.csv")
+def main(main_dir):
+    step_table = pd.read_csv(f"{main_dir}/step_table.csv")
     step_table_grouped = step_table.groupby(['mouse-type', 'exp-type', 'mouse-id', 'trial-number'])
     for trial_i, (name, trial) in enumerate(step_table_grouped):
         trial_name = "_".join(str(item) for item in name)
         print(trial_name)
-        plot_diagram(trial)
+        plot_diagram(trial, main_dir)
 
 
 
 if __name__ == "__main__":
-    main()
+    main('Full_data')
