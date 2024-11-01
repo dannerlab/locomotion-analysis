@@ -18,6 +18,7 @@ main_dir = 'Sample_data'
 start_time = time.time()
 step_table_initialize_main(main_dir)
     #prints h5 save directories, then saves step_table.csv to main_dir
+    #also runs segmental_calc which adds segmental stats to the h5 files directly
 animal_avgs_main(main_dir)
     #saves animal_avg_&_stdv.csv to main_dir
 group_comparison_main(main_dir)
