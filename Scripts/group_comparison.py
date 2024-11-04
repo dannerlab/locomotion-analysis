@@ -165,6 +165,7 @@ def save(fp, normal, non_normal, anova, name):
 
 
 def main(main_dir):
+    print('running group_comparison.py')
     alpha = 0.05
 
     #by animal

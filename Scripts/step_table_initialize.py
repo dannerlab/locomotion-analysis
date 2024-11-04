@@ -211,12 +211,12 @@ def step_table_initialize(h5_dirs):
     return step_table
 
 def main(main_dir):
+    print('running step_table_initialize.py')
     #input
     groups = ['V3Off_Levelwalk', 'WT_Levelwalk']
 
     h5_dirs = [os.path.join(main_dir, group, 'h5_knee_fixed') for group in groups]
-    for h5_dir in h5_dirs:
-        print(h5_dir)
+
     #run code
     step_table = step_table_initialize(h5_dirs)
 
