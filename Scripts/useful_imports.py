@@ -53,6 +53,19 @@ def get_numeric_col_names():
                     "stance-IliacCrest_y-max",
                     "stance-IliacCrest_y-end",
                     "stance-IliacCrest_y-excursion",
+                    # hip to toe x position stats
+                    "step-Hip_to_Toe_x-min",
+                    "step-Hip_to_Toe_x-max",
+                    "step-Hip_to_Toe_x-end",
+                    "step-Hip_to_Toe_x-excursion",
+                    "swing-Hip_to_Toe_x-min",
+                    "swing-Hip_to_Toe_x-max",
+                    "swing-Hip_to_Toe_x-end",
+                    "swing-Hip_to_Toe_x-excursion",
+                    "stance-Hip_to_Toe_x-min",
+                    "stance-Hip_to_Toe_x-max",
+                    "stance-Hip_to_Toe_x-end",
+                    "stance-Hip_to_Toe_x-excursion",
                     # interesting stats for full step cycle
                     "step-duration",
                     "cycle-velocity",
@@ -149,3 +162,12 @@ def get_rc_params():
         "savefig.dpi": 200,
     }
     return rc_params
+
+def get_position_stats():
+    position_stats = ['ToeTip_x', 'ToeTip_y', 
+                      'Ankle_x', 'Ankle_y',
+                      'Knee_x', 'Knee_y',
+                      'Hip_x', 'Hip_y', 
+                      'IliacCrest_x', 'IliacCrest_y',
+                      'Hip_to_Toe_x']
+    return position_stats

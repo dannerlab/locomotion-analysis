@@ -10,6 +10,7 @@ import numpy as np
 from stepwise_data_calc import calc_discrete_stats, add_second_swing, calc_joint_angle_stats, calc_segmental_stats
 from segmental_calc import calculate_segmental_angles
 from useful_imports import import_kinematics
+from calculate_hip_to_toe import calculate_hip_to_toe_x
 import IPython
 
 #suppress PerformanceWarning so it stops warning about fragmented DataFrame
@@ -193,6 +194,7 @@ def step_table_initialize(h5_dirs):
         if trialname_h5 == trailname_phase:
             #basic set-up
             calculate_segmental_angles(h5_path, segment_dict)
+            calculate_hip_to_toe_x(h5_path)
             trial_data = get_trial_data(h5_path, belt_speed)
             trial_table = get_step_data(h5_path, phase_path, trial_data) #will require update once we add ankle phases
             trial_table = add_second_swing(trial_table)
@@ -208,6 +210,7 @@ def step_table_initialize(h5_dirs):
             print('skipping')
     
     step_table = pd.concat((step_dfs_by_trial), ignore_index = True)
+
     return step_table
 
 def main(main_dir):
