@@ -10,7 +10,7 @@ import os
 import IPython
 from useful_imports import import_kinematics, get_rc_params
 
-rc_params = get_rc_params
+rc_params = get_rc_params()
 plt.rcParams.update(rc_params)
 
 def plot_diagram(trial, main_dir):
@@ -119,12 +119,13 @@ def plot_diagram(trial, main_dir):
     plt.close()
 
 def main(main_dir):
+    print('running stick_plots.py')
     step_table = pd.read_csv(f"{main_dir}/step_table.csv")
     step_table_grouped = step_table.groupby(['mouse-type', 'exp-type', 'mouse-id', 'trial-number'])
     for trial_i, (name, trial) in enumerate(step_table_grouped):
         trial_name = "_".join(str(item) for item in name)
-        print(trial_name)
         plot_diagram(trial, main_dir)
+    print(f'saved to: {main_dir}/stick_diagrams')
 
 
 
