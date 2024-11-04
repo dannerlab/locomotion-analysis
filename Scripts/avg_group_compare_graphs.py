@@ -18,6 +18,9 @@ def set_ylim(stat):
         'duty-factor': (0, 1, 0, 0.1), #wants to be up to .75 for both
         'x-excursion': (0, 55, 0, 10),
         'y-excursion': (0, 20, 0, 3),
+        'Hip_to_Toe_x-max': (0, 50, 0, 10),
+        'Hip_to_Toe_x-min': (-50, 0, 0, 10),
+        'Hip_to_Toe_x-excursion': (0, 50, 0, 10)
          }
 
     specific_ylims = { #default values
@@ -80,6 +83,7 @@ def graph_stat(avg_table_path, stat, stat_type):
         os.makedirs(save_path)
     plt.savefig(os.path.join(save_path, save_name))
     plt.clf()
+    plt.close()
 
 def main(main_dir):
     print('running avg_group_compare_graphs.py')
@@ -87,9 +91,10 @@ def main(main_dir):
     #step_table = pd.read_csv('step_table.csv')
     stats = ['stance-duration', 'swing-duration', 'step-duration',
             'step-ToeTip_x-excursion', 'step-ToeTip_y-excursion',
-            'step-ToeTip_x-max', 'step-ToeTip_x-min',
+            #'step-ToeTip_x-max', 'step-ToeTip_x-min',
             'step-IliacCrest_y-excursion',
-            'duty-factor'] 
+            'duty-factor',
+            'step-Hip_to_Toe_x-max', 'step-Hip_to_Toe_x-min', 'step-Hip_to_Toe_x-excursion'] 
             #add more stats, should match column labels for animal_avg_and_stdv.csv without the 'avg'/ 'stdv' prefix
             #advised to augment the y limits dictionary at top of script when you add more stats
     stat_types = ['avg', 'stdv']
