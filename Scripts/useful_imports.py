@@ -16,6 +16,7 @@ def import_kinematics(file):
 def get_numeric_col_names():
     selected_col_names = ['stance-duration',
                     'swing-duration',
+                    #x and y positions & excursion of joints for step, swing, and stance
                     "step-ToeTip_x-min",
                     "step-ToeTip_x-max",
                     "step-ToeTip_x-end",
@@ -52,10 +53,25 @@ def get_numeric_col_names():
                     "stance-IliacCrest_y-max",
                     "stance-IliacCrest_y-end",
                     "stance-IliacCrest_y-excursion",
+                    # hip to toe x position stats
+                    "step-Hip_to_Toe_x-min",
+                    "step-Hip_to_Toe_x-max",
+                    "step-Hip_to_Toe_x-end",
+                    "step-Hip_to_Toe_x-excursion",
+                    "swing-Hip_to_Toe_x-min",
+                    "swing-Hip_to_Toe_x-max",
+                    "swing-Hip_to_Toe_x-end",
+                    "swing-Hip_to_Toe_x-excursion",
+                    "stance-Hip_to_Toe_x-min",
+                    "stance-Hip_to_Toe_x-max",
+                    "stance-Hip_to_Toe_x-end",
+                    "stance-Hip_to_Toe_x-excursion",
+                    # interesting stats for full step cycle
                     "step-duration",
                     "cycle-velocity",
                     "duty-factor",
                     "stride-length",
+                    #joint angle max, min, excursion for step, swing, and stance
                     "step-Hip_angle-min",
                     "step-Hip_angle-max",
                     "step-Hip_angle-excursion",
@@ -120,3 +136,38 @@ def get_numeric_col_names():
                     "stance-Shank-max",
                     "stance-Shank-excursion"]
     return(selected_col_names)
+
+def get_rc_params():
+    rc_params = {
+        "figure.constrained_layout.use": False,
+        "figure.figsize": (6.75, 1.0),
+        "axes.linewidth": 1,
+        "grid.linewidth": 1,
+        # Axes
+        "axes.spines.right": False,
+        "axes.spines.top": False,
+        "axes.formatter.useoffset": False,
+        # Font sizes
+        "axes.labelsize": 12,
+        "xtick.labelsize": 12,
+        "ytick.labelsize": 12,
+        "legend.fontsize": 12,
+        "font.size": 12,
+        "lines.markersize": 1.0,
+        'xtick.major.pad': 1,
+        'ytick.major.pad': 1,
+        # save
+        "savefig.transparent": True,
+        "savefig.bbox": "tight",
+        "savefig.dpi": 200,
+    }
+    return rc_params
+
+def get_position_stats():
+    position_stats = ['ToeTip_x', 'ToeTip_y', 
+                      'Ankle_x', 'Ankle_y',
+                      'Knee_x', 'Knee_y',
+                      'Hip_x', 'Hip_y', 
+                      'IliacCrest_x', 'IliacCrest_y',
+                      'Hip_to_Toe_x']
+    return position_stats

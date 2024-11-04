@@ -10,6 +10,8 @@ import numpy as np
 from stepwise_data_calc import calc_discrete_stats, add_second_swing, calc_joint_angle_stats, calc_segmental_stats
 from segmental_calc import calculate_segmental_angles
 from useful_imports import import_kinematics
+from calculate_hip_to_toe import calculate_hip_to_toe_x
+import IPython
 
 #suppress PerformanceWarning so it stops warning about fragmented DataFrame
 warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
@@ -185,35 +187,39 @@ def step_table_initialize(h5_dirs):
 
 
     step_dfs_by_trial = []
-    for h5_path, phase_path in zip(h5_paths, phase_paths):
+    trial_table = pd.DataFrame()
+    for h5_path, phase_path in zip(h5_paths, phase_paths): # for each trial
         trialname_h5 = os.path.splitext(os.path.split(h5_path)[1])[0]
         trailname_phase = os.path.splitext(os.path.split(phase_path)[1])[0]
         if trialname_h5 == trailname_phase:
             #basic set-up
             calculate_segmental_angles(h5_path, segment_dict)
+            calculate_hip_to_toe_x(h5_path)
             trial_data = get_trial_data(h5_path, belt_speed)
-            step_table = get_step_data(h5_path, phase_path, trial_data) #will require update once we add ankle phases
-            step_table = add_second_swing(step_table)
+            trial_table = get_step_data(h5_path, phase_path, trial_data) #will require update once we add ankle phases
+            trial_table = add_second_swing(trial_table)
 
             #additional calculations
-            step_table = calc_discrete_stats(step_table, slicing_dict)
-            step_table = calc_joint_angle_stats(step_table, joint_angles, slicing_dict)
-            step_table = calc_segmental_stats(step_table, segment_dict, slicing_dict)
-            step_dfs_by_trial.append(step_table)
+            trial_table = calc_discrete_stats(trial_table, slicing_dict)
+            trial_table = calc_joint_angle_stats(trial_table, joint_angles, slicing_dict)
+            trial_table = calc_segmental_stats(trial_table, segment_dict, slicing_dict)
+            step_dfs_by_trial.append(trial_table)
+
         else:
             print(f'file mismatch: \nh5: {trialname_h5}, phase: {trailname_phase}')
-
+            print('skipping')
+    
     step_table = pd.concat((step_dfs_by_trial), ignore_index = True)
 
     return step_table
 
-def main():
+def main(main_dir):
+    print('running step_table_initialize.py')
     #input
     groups = ['V3Off_Levelwalk', 'WT_Levelwalk']
 
-    h5_dirs = [os.path.join('Sample_data', group, 'h5') for group in groups]
-    for h5_dir in h5_dirs:
-        print(h5_dir)
+    h5_dirs = [os.path.join(main_dir, group, 'h5_knee_fixed') for group in groups]
+
     #run code
     step_table = step_table_initialize(h5_dirs)
 
@@ -225,4 +231,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main("Full_data")

@@ -164,20 +164,21 @@ def save(fp, normal, non_normal, anova, name):
     print(f'saved to: {save_location}')
 
 
-def main():
+def main(main_dir):
+    print('running group_comparison.py')
     alpha = 0.05
 
     #by animal
-    animal_stats_fp = 'Sample_data/animal_avg_&_stdv.csv'
+    animal_stats_fp = f'{main_dir}/animal_avg_&_stdv.csv'
     normal_animal, non_normal_animal, anova_animal = compare_animal_means(animal_stats_fp, alpha)
     save(animal_stats_fp, normal_animal, non_normal_animal, anova_animal, "animal")
 
     #by step cycle
-    step_table_fp = 'Sample_data/step_table.csv'
+    step_table_fp = f'{main_dir}/step_table.csv'
     normal_stats, non_normal_stats, one_way_p = compare_step_cycles(step_table_fp, alpha)
     save(step_table_fp, normal_stats, non_normal_stats, one_way_p, "")
 
     return
 
 if __name__ == "__main__":
-    main()
+    main(main_dir="Full_data")
