@@ -6,6 +6,7 @@ import os
 import pandas as pd
 import IPython
 import sys
+from useful_imports import get_position_stats
 
 def import_kinematics(file):
     #imports the kinematics portion of the hdf
@@ -18,7 +19,7 @@ def import_kinematics(file):
 
 def add_position_stats(step_table, slicing_dict):
 
-    stats = ['ToeTip_x', 'ToeTip_y', 'IliacCrest_y']
+    stats = get_position_stats()
 
     for step_i, step in step_table.iterrows():
         h5_path = step['source-data-h5-path']
