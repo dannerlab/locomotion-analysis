@@ -12,16 +12,16 @@ def calc_avg(step_table):
     step_table_grouped = step_table.groupby(['mouse-type', 'exp-type', 'mouse-id'])
 
     trial_ID_cols = ['mouse-id',
-                              'mouse-type',
-                              'exp-type',
-                              ]
+                     'mouse-type',
+                     'exp-type',
+                    ]
     selected_col_names = get_numeric_col_names()
 
     ID_df = step_table[trial_ID_cols].drop_duplicates()
     ID_df = ID_df.reset_index(drop=True) #so that when it is concatenated with avg & stdv dfs there are not issues
 
     avg_arr = np.full((len(step_table_grouped), len(selected_col_names)), np.NaN) #array with length = n mice and width = n stats
-    stdv_arr = avg_arr #same array but will be filled with stdv
+    stdv_arr = np.full((len(step_table_grouped), len(selected_col_names)), np.NaN) #same array but will be filled with stdv
 
     for mouse_i, (name, mouse) in enumerate(step_table_grouped):
         for col_i, col in enumerate(selected_col_names):
@@ -34,7 +34,7 @@ def calc_avg(step_table):
     stdv_selected_col_names = (f'stdv-{col_name}' for col_name in selected_col_names)
 
     avg_df = pd.DataFrame(avg_arr, columns=avg_selected_col_names)
-    stdv_df = pd.DataFrame(avg_arr, columns=stdv_selected_col_names)
+    stdv_df = pd.DataFrame(stdv_arr, columns=stdv_selected_col_names)
     results_df = pd.concat([ID_df, avg_df, stdv_df], axis = 1, ignore_index=False)
     return results_df
 
@@ -42,11 +42,12 @@ def save_results(results_df, step_table_path):
     save_dir = os.path.split(step_table_path)[0]
     save_name = os.path.join(save_dir, "animal_avg_&_stdv.csv")
     results_df.to_csv(save_name)
-    print(f"saved to: {save_name}")
+
 
 
 
 def main(main_dir):
+    print('running animal_avgs.py')
     step_table_path = f"{main_dir}/step_table.csv"
     step_table = pd.read_csv(step_table_path)
 
