@@ -171,3 +171,20 @@ def get_position_stats():
                       'IliacCrest_x', 'IliacCrest_y',
                       'Hip_to_Toe_x']
     return position_stats
+
+def get_continuous_stats():
+    continuous_stats = ['Hip_angle', 'Knee_angle', 'Ankle_angle', 'MTP_angle', 
+                        'Crest_angle', 'Thigh_angle', 'Shank_angle']
+    return continuous_stats
+
+def get_joints():
+    joints = ['Hip', 'Knee', 'Ankle', 'MTP']
+    return joints
+
+def get_segments():
+    segments = ['Crest', 'Thigh', 'Shank']
+    return segments
+
+def get_joints_and_segments():
+    joints_and_segments = get_joints() + get_segments()
+    return joints_and_segments
