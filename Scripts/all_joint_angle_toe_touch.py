@@ -161,16 +161,21 @@ def get_steps_array(group, joint_or_seg):
             step_stance_length = step['abs-idx'].tolist()[-1] - step_toe_touch
 
             #pad relative to longest phase of steps in the group
+            #np.empty(np.nan(max_length, 1))
             swing_zeros = np.nan*(np.ones(max_swing - step_swing_length)) #something is wrong because there is a swing that is length of 66 (trial 12, step 6)
             stance_zeros = np.nan*(np.ones(max_stance - step_stance_length))
             zeroed_joint_angle = list(swing_zeros) + list(step[f'{joint_or_seg}']) + list(stance_zeros)
             steps_array[step_i] = zeroed_joint_angle #add this step to the array of all steps for this trial
+            if np.any(steps_array > 1000):
+                    print(trial_i, step_i)
+
 
         steps_arrays.append(steps_array) #add this array to the list of all arrays for all trials in the group
 
     return steps_arrays, max_toe_touch_idx, max_length
 
 def graph(steps_arrays, group_name, max_toe_touch_idx, joint_or_seg, save_directory, max_length):
+        plt.clf()
         #colors for multicolor
         num_colors = len(steps_arrays)
         cmap = plt.get_cmap('turbo')
@@ -186,20 +191,26 @@ def graph(steps_arrays, group_name, max_toe_touch_idx, joint_or_seg, save_direct
 
         #plt.ylim([0, 180])
         for trial_i, trial in enumerate(steps_arrays):
+            if trial_i > 5:
+                break
             for step_i, step in enumerate(trial):
-                #IPython.embed()
-                #fedsakl
-                plt.plot(step, color = colors[trial_i], alpha = 0.25)
+                if step_i == 0:
+                    plt.plot(step, color = colors[trial_i], alpha = 0.25, label = f'Trial {trial_i}')
+                else:
+                    plt.plot(step, color = colors[trial_i], alpha = 0.25)
                 #plt.plot(step, color = 'gray', alpha = 0.5)
         #plt.axvline(x=max_toe_touch_idx, color = 'black', linestyle = '--')
         plt.xlabel('Index of step') ###should change code so that x label is time...
         plt.ylabel(f'{joint_or_seg} (\u00B0)')
+        plt.legend()
         #plt.xlim([-0.2, 0.4])
         plt.ylim([30, 140])
 
         #save & display
         save_name = os.path.join(save_directory, f'{group_name}_{joint_or_seg}_all_trials')
+        plt.show()
         plt.savefig(f'{save_name}.png')
+        
 
         #calc_avg_lines(steps_arrays, max_length)
 
@@ -242,7 +253,7 @@ def main(main_dir):
         group_name = '_'.join(group) #should be something like WT_Levelwalk
         print(group_name)
         for joint_or_seg in joint_seg_names:
-            if joint_or_seg == 'Hip_angle' or joint_or_seg == 'Ankle_angle':
+            if joint_or_seg == 'Hip_angle':
                 steps_arrays, max_toe_touch_idx, max_length = get_steps_array(group_data, joint_or_seg)
                 graph(steps_arrays, group_name, max_toe_touch_idx, joint_or_seg, save_directory, max_length)
 
