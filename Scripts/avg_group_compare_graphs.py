@@ -51,9 +51,11 @@ def set_ylim(stat):
 
     return specific_ylims
 
-def graph_stat(avg_table_path, stat, stat_type):
+def graph_stat(avg_table_path, stat, stat_type, compare_table_path):
+    #read in data
     avg_table = pd.read_csv(avg_table_path)
     avg_table_grouped = avg_table.groupby(['mouse-type', 'exp-type'])
+    p_values = pd.read_csv(compare_table_path, index_col = 0)
 
     #make nice table for plotting from
     plot_data = []
@@ -64,6 +66,19 @@ def graph_stat(avg_table_path, stat, stat_type):
     plot_df = pd.DataFrame(plot_data)
     plot_df['Group'] = pd.Categorical(plot_df['Group'], categories = ['WT_Levelwalk', 'V3Off_Levelwalk'], ordered = True) #alter for more groups
 
+    #determine significance
+    significance = ''
+    if stat_type == 'avg':
+        if stat in p_values.index:
+            p_val = p_values.loc[stat, 'ANOVA_p_value']
+            if p_val < 0.001:
+                significance = '***'
+            elif p_val < 0.01:
+                significance = '**'
+            elif p_val < 0.05:
+                significance = '*'
+            
+
     palette = {'WT_Levelwalk': 'blue', 'V3Off_Levelwalk': 'red'} #alter for more groups
     plt.figure(figsize=(10, 6))
     #actually plot
@@ -73,6 +88,7 @@ def graph_stat(avg_table_path, stat, stat_type):
     ylim_dict = set_ylim(stat)
     ymin_type = ylim_dict[f'ymin_{stat_type}']
     ymax_type = ylim_dict[f'ymax_{stat_type}']
+    plt.text(0.5, 0.7, significance, fontsize = 20, ha = 'center', va = 'center', transform = plt.gca().transAxes)
     plt.ylim(ymin_type, ymax_type)
 
 
@@ -88,7 +104,8 @@ def graph_stat(avg_table_path, stat, stat_type):
 def main(main_dir):
     print('running avg_group_compare_graphs.py')
     avg_table_path = f'{main_dir}/animal_avg_&_stdv.csv'
-    #step_table = pd.read_csv('step_table.csv')
+    compare_table_path = f'{main_dir}/group_results/ANOVA_results.csv'
+
     stats = ['stance-duration', 'swing-duration', 'step-duration',
             'step-ToeTip_x-excursion', 'step-ToeTip_y-excursion',
             #'step-ToeTip_x-max', 'step-ToeTip_x-min',
@@ -101,7 +118,7 @@ def main(main_dir):
 
     for stat_type in stat_types:
         for stat in stats:
-            graph_stat(avg_table_path, stat, stat_type)
+            graph_stat(avg_table_path, stat, stat_type, compare_table_path)
     print(f'saved to: {main_dir}/group_results/avg_graphs')
     return
 
