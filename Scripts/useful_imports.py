@@ -137,7 +137,7 @@ def get_numeric_col_names():
                     "stance-Shank-excursion"]
     return(selected_col_names)
 
-def get_rc_params():
+def get_rc_params(): #these should be just the params for stick figures
     rc_params = {
         "figure.constrained_layout.use": False,
         "figure.figsize": (6.75, 1.0),
@@ -162,6 +162,8 @@ def get_rc_params():
         "savefig.dpi": 200,
     }
     return rc_params
+
+#should implement rc_params for the other graphs that are not stick figures
 
 def get_position_stats():
     position_stats = ['ToeTip_x', 'ToeTip_y', 
@@ -188,3 +190,7 @@ def get_segments():
 def get_joints_and_segments():
     joints_and_segments = get_joints() + get_segments()
     return joints_and_segments
+
+def get_sampling_freq():
+    sampling_freq = 200
+    return sampling_freq
