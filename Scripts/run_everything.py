@@ -15,6 +15,7 @@ from animal_avgs import main as animal_avgs_main
 from group_comparison import main as group_comparison_main  
 from stick_plots import main as stick_plots_main
 from avg_group_compare_graphs import main as avg_group_compare_graphs_main
+from all_joint_angle_toe_touch import main as all_joint_angle_toe_touch
 
 main_dir = 'Full_data'
 
@@ -38,6 +39,10 @@ print()
 
 avg_group_compare_graphs_main(main_dir)
     #saves graphs to main_dir/group_results/avg_graphs
+print()
+
+all_joint_angle_toe_touch(main_dir)
+    #saves graphs to main_dir/angle_graphs/toe_touch_aligned
 print()
 
 stop_time = time.time()
