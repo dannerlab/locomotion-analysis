@@ -10,6 +10,7 @@ from scipy.stats import f_oneway
 import scipy.stats as stats
 import numpy as np
 from useful_imports import get_numeric_col_names
+import IPython
 
 def combine_dicts(*dicts): #GitHub Co-pilot assistance
     combined_dict = {}
@@ -78,16 +79,25 @@ def shapiro_and_k(standardized_residuals, alpha):
             if key in k_non_normal.keys():
                 non_normal_stats[key] = [shapiro_non_normal[key], k_non_normal[key]]
             else:
-                non_normal_stats[key] = [shapiro_non_normal[key], k_normal[key]]
-        elif key in k_non_normal.keys():
-            non_normal_stats[key] = [shapiro_normal[key], k_non_normal[key]]
+                normal_stats[key] = [shapiro_non_normal[key], k_normal[key]]
         else:
             normal_stats[key] = [shapiro_normal[key], k_normal[key]]
 
     #convert to dict
-    normal_stats = pd.DataFrame(normal_stats, index=['shapiro_p', 'kolmogorov-smirnov_p'])
-    non_normal_stats = pd.DataFrame(non_normal_stats, index=['shapiro_p', 'kolmogorov-smirnov_p'])
-    return normal_stats, non_normal_stats
+    rows = normal_stats.keys()
+    columns = ['stat', 'shapiro_p', 'kolmogorov-smirnov_p']
+    normal_stats_dict = {columns[0]: rows,
+            columns[1]: [normal_stats[row][0] for row in rows],
+            columns[2]: [normal_stats[row][1] for row in rows]}
+    normal_stats_df = pd.DataFrame(normal_stats_dict)
+
+    rows = non_normal_stats.keys()
+    non_normal_stats_dict = {columns[0]: rows,
+            columns[1]: [non_normal_stats[row][0] for row in rows],
+            columns[2]: [non_normal_stats[row][1] for row in rows]}
+    non_normal_stats_df = pd.DataFrame(non_normal_stats_dict)
+
+    return normal_stats_df, non_normal_stats_df
 
 
 def calc_anova(step_table_grouped, selected_stats, alpha):
@@ -156,6 +166,7 @@ def save(fp, normal, non_normal, anova, name):
     normal_save_name = os.path.join(save_location, f'{name}normal_stats.csv')
     non_normal_save_name = os.path.join(save_location, f'{name}non_normal_stats.csv')
     anova_save_name = os.path.join(save_location, f'{name}ANOVA_results.csv')
+
 
     normal.to_csv(normal_save_name)
     non_normal.to_csv(non_normal_save_name)
