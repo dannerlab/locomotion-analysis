@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import os
 import IPython
-from useful_imports import import_kinematics, get_rc_params
+from useful_imports import import_kinematics
 
 rc_params = {
         "figure.constrained_layout.use": False,
