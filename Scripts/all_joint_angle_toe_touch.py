@@ -219,8 +219,9 @@ def graph(mouse_avg_steps, group_avg_step, group_name, max_toe_touch_idx, joint_
     plt.xlabel('Time of step (s)') ###should change code so that x label is time...
     plt.ylabel(f'{joint_or_seg} (\u00B0)')
     #plt.legend()
-    #plt.xlim([-0.2, 0.4])
-    #plt.ylim([30, 140])
+    plt.xlim([-0.2, 0.35])
+    if joint_or_seg == "Shank_angle":
+        plt.ylim([-30, 150])
 
     #save & display
     save_name = os.path.join(save_directory, f'{group_name}_{joint_or_seg}_all_trials')
