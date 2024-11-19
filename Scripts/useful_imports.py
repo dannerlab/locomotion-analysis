@@ -140,7 +140,7 @@ def get_numeric_col_names():
 def get_rc_params(): #these should be just the params for stick figures
     rc_params = {
         "figure.constrained_layout.use": False,
-        "figure.figsize": (6.75, 1.0),
+        "figure.figsize": (5, 4),
         "axes.linewidth": 1,
         "grid.linewidth": 1,
         # Axes

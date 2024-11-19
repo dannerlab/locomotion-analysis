@@ -51,6 +51,23 @@ def set_ylim(stat):
 
     return specific_ylims
 
+def set_ylabel(stat):
+    stat_labels = {'stance-duration': 'Stance Duration (s)',
+                   'swing-duration': 'Swing Duration (s)',
+                     'step-duration': 'Step Duration (s)',
+                        'step-ToeTip_x-excursion': 'ToeTip x Excursion (mm)',
+                        'step-ToeTip_y-excursion': 'ToeTip y Excursion (mm)',
+                        'step-IliacCrest_y-excursion': 'IliacCrest y Excursion (mm)',
+                        'duty-factor': 'Duty Factor',
+                        'step-Hip_to_Toe_x-max': 'Hip to Toe x Max (mm)',
+                        'step-Hip_to_Toe_x-min': 'Hip to Toe x Min (mm)',
+                        'step-Hip_to_Toe_x-excursion': 'Hip to Toe x Excursion (mm)'}
+    try:
+        return stat_labels[stat]
+    except KeyError:  
+        print(f'please add label for {stat}')
+        return ""
+
 def graph_stat(avg_table_path, stat, stat_type, compare_table_path):
     #read in data
     avg_table = pd.read_csv(avg_table_path)
@@ -84,12 +101,12 @@ def graph_stat(avg_table_path, stat, stat_type, compare_table_path):
     #actually plot
     sns.boxplot(x = 'Group', y = 'Value', data = plot_df, hue = 'Group', palette = palette)
     sns.stripplot(x = 'Group', y = 'Value', data = plot_df, color = 'black', jitter = 0.2, size = 2.5)
-    plt.title(f'{stat}-{stat_type}')
     ylim_dict = set_ylim(stat)
     ymin_type = ylim_dict[f'ymin_{stat_type}']
     ymax_type = ylim_dict[f'ymax_{stat_type}']
-    plt.text(0.5, 0.7, significance, fontsize = 20, ha = 'center', va = 'center', transform = plt.gca().transAxes)
+    plt.text(0.5, 0.7, significance, ha = 'center', va = 'center', transform = plt.gca().transAxes)
     plt.ylim(ymin_type, ymax_type)
+    plt.ylabel(set_ylabel(stat))
 
 
     #save plot
@@ -114,6 +131,7 @@ def main(main_dir):
             'step-Hip_to_Toe_x-max', 'step-Hip_to_Toe_x-min', 'step-Hip_to_Toe_x-excursion'] 
             #add more stats, should match column labels for animal_avg_and_stdv.csv without the 'avg'/ 'stdv' prefix
             #advised to augment the y limits dictionary at top of script when you add more stats
+            #should also augment y labels dictionary when you add a stat
     stat_types = ['avg', 'stdv']
 
     for stat_type in stat_types:
