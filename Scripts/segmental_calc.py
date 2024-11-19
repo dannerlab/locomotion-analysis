@@ -15,7 +15,9 @@ def calculate_segmental_angles(h5_path, segment_dict):
         upper_y = h5_df[f'{upper_joint}_y']
         lower_x = h5_df[f'{lower_joint}_x']
         lower_y = h5_df[f'{lower_joint}_y']
-        h5_df[f'{segment}_angle'] = np.arctan2((upper_y - lower_y), (upper_x - lower_x))
+        radians_angle = np.arctan2((upper_y - lower_y), (upper_x - lower_x))
+        degrees_angle = np.degrees(radians_angle)
+        h5_df[f'{segment}_angle'] = degrees_angle
         #adds column & calculates angles for shank
         #radians by default
 
