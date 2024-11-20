@@ -194,3 +194,8 @@ def get_joints_and_segments():
 def get_sampling_freq():
     sampling_freq = 200
     return sampling_freq
+
+def get_excluded_trials():
+    #each tuple is a trial, format is group, condition, trial
+    excluded_trials = [('WT', 'Levelwalk', 'gp18m2_1'), ('WT', 'Levelwalk', 'gp17m1')] #need to figure out how many gp17m1 have weird MTP angle for exclusion, currently the avg is all weird
+    return excluded_trials
