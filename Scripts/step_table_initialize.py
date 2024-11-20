@@ -193,10 +193,10 @@ def step_table_initialize(h5_dirs):
         trailname_phase = os.path.splitext(os.path.split(phase_path)[1])[0]
         if trialname_h5 == trailname_phase:
             #basic set-up
-            calculate_segmental_angles(h5_path, segment_dict)
-            calculate_hip_to_toe_x(h5_path)
-            trial_data = get_trial_data(h5_path, belt_speed)
-            trial_table = get_step_data(h5_path, phase_path, trial_data) #will require update once we add ankle phases
+            h5_with_stats_path = calculate_segmental_angles(h5_path, segment_dict)
+            calculate_hip_to_toe_x(h5_with_stats_path)
+            trial_data = get_trial_data(h5_with_stats_path, belt_speed)
+            trial_table = get_step_data(h5_with_stats_path, phase_path, trial_data) #will require update once we add ankle phases
             trial_table = add_second_swing(trial_table)
 
             #additional calculations
