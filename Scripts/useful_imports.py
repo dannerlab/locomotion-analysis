@@ -197,7 +197,6 @@ def get_sampling_freq():
     return sampling_freq
 
 def exclude_trials(step_table_df):
-    print(len(step_table_df))
     excluded_trials = [('WT', 'Levelwalk', 'gp18m2', 1), ('WT', 'Levelwalk', 'gp17m1', 1),('WT', 'Levelwalk', 'gp17m1', 2),('WT', 'Levelwalk', 'gp17m1', 3)]
     step_table_df_grouped = step_table_df.groupby(['mouse-type', 'exp-type', 'mouse-id', 'trial-number'])
     dropped_trials = []

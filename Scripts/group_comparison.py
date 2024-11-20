@@ -9,7 +9,7 @@ from scipy.stats import shapiro
 from scipy.stats import f_oneway
 import scipy.stats as stats
 import numpy as np
-from useful_imports import get_numeric_col_names
+from useful_imports import get_numeric_col_names, exclude_trials
 import IPython
 
 def combine_dicts(*dicts): #GitHub Co-pilot assistance
@@ -140,7 +140,8 @@ def compare_animal_means(animal_stats_fp, alpha):
 
 def compare_step_cycles(step_table_fp, alpha):
     """ Compares 2+ groups based on step cycle level data """
-    step_table = pd.read_csv(step_table_fp)
+    step_table_unfiltered = pd.read_csv(step_table_fp)
+    step_table, excluded_trials = exclude_trials(step_table_unfiltered)
     step_table_grouped = step_table.groupby(['mouse-type', 'exp-type'])
     selected_stats = get_numeric_col_names() #gets names of the columns that it makes sense to run these tests on
 
