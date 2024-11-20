@@ -3,7 +3,7 @@ runs scripts to generate:
 - step_table.csv with stepwise stats
 - animal_avg_&_stdv.csv with avgs and stdvs
 - ANOVA_results.csv with group comparisons of the stats in animal_avg_&_stdv.csv
-requires h5s with adjusted knee angles, recommend using batch_convert.py followed by locoproc
+requires h5s with adjusted knee angles, recommend using batch_convert.py followed by locoproc, see also instructions on Data Prep in the wiki
 """
 print('importing...')
 
