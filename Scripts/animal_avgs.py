@@ -6,7 +6,7 @@ import pandas as pd
 import IPython
 import numpy as np
 import os
-from useful_imports import get_numeric_col_names
+from useful_imports import get_numeric_col_names, exclude_trials
 
 def calc_avg(step_table):
     step_table_grouped = step_table.groupby(['mouse-type', 'exp-type', 'mouse-id'])
@@ -42,15 +42,14 @@ def save_results(results_df, step_table_path):
     save_dir = os.path.split(step_table_path)[0]
     save_name = os.path.join(save_dir, "animal_avg_&_stdv.csv")
     results_df.to_csv(save_name)
-
-
-
+    print('saved to:', save_name)
 
 def main(main_dir):
     print('running animal_avgs.py')
     step_table_path = f"{main_dir}/step_table.csv"
-    step_table = pd.read_csv(step_table_path)
-
+    step_table_unfiltered = pd.read_csv(step_table_path)
+    step_table, excluded_trials = exclude_trials(step_table_unfiltered)
+    
     results_df = calc_avg(step_table)
     save_results(results_df, step_table_path)
 

@@ -1,6 +1,7 @@
 """
 function for importing kinematics, column names, 
 """
+import IPython
 import pandas as pd
 import os
 
@@ -195,7 +196,14 @@ def get_sampling_freq():
     sampling_freq = 200
     return sampling_freq
 
-def get_excluded_trials():
-    #each tuple is a trial, format is group, condition, trial
-    excluded_trials = [('WT', 'Levelwalk', 'gp18m2_1'), ('WT', 'Levelwalk', 'gp17m1')] #need to figure out how many gp17m1 have weird MTP angle for exclusion, currently the avg is all weird
-    return excluded_trials
+def exclude_trials(step_table_df):
+    print(len(step_table_df))
+    excluded_trials = [('WT', 'Levelwalk', 'gp18m2', 1), ('WT', 'Levelwalk', 'gp17m1', 1),('WT', 'Levelwalk', 'gp17m1', 2),('WT', 'Levelwalk', 'gp17m1', 3)]
+    step_table_df_grouped = step_table_df.groupby(['mouse-type', 'exp-type', 'mouse-id', 'trial-number'])
+    dropped_trials = []
+    for trial, data in step_table_df_grouped:
+        if trial in excluded_trials:
+            step_table_df = step_table_df.drop(data.index)
+            dropped_trials.append(trial)
+    print(f"dropped trials: {dropped_trials}")
+    return step_table_df, dropped_trials
