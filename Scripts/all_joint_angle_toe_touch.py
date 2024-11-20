@@ -209,16 +209,16 @@ def graph(mouse_avg_steps, group_avg_step, group_name, max_toe_touch_idx, joint_
     mouse_wise_grouped = group.groupby('mouse-id')
     mouse_ids = list(mouse_wise_grouped.groups.keys())
     for mouse_i, mouse in enumerate(mouse_avg_steps):
-        #plt.plot(time_vec, mouse, color = colors[mouse_i], alpha = 1, label = mouse_ids[mouse_i])
-        plt.plot(time_vec, mouse, color = 'grey', alpha = 0.25)
+        #plt.plot(time_vec, mouse, color = colors[mouse_i], alpha = .75, label = mouse_ids[mouse_i]) #uncomment for color for each mouse, comment next line
+        plt.plot(time_vec, mouse, color = 'grey', alpha = 0.25) #uncomment for grey for each mouse, comment above line
     plt.axvline(time_vec[max_toe_touch_idx], color = 'black', linestyle = '--')
     plt.plot(time_vec, group_avg_step, color = group_color, linewidth = 2)
     upper = group_avg_step + group_stdv
     lower = group_avg_step - group_stdv
     plt.fill_between(time_vec, lower, upper, color = group_color, alpha = 0.2)
-    plt.xlabel('Time of step (s)') ###should change code so that x label is time...
+    plt.xlabel('Time of step (s)')
     plt.ylabel(f'{joint_or_seg} (\u00B0)')
-    #plt.legend()
+    #plt.legend() #uncomment for mousewise colors
     plt.xlim([-0.2, 0.35])
     if joint_or_seg == "Shank_angle":
         plt.ylim([-30, 150])
