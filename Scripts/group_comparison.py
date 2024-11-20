@@ -181,7 +181,7 @@ def main(main_dir):
     alpha = 0.05
 
     #by animal
-    animal_stats_fp = f'{main_dir}/animal_avg_&_stdv.csv'
+    animal_stats_fp = f'{main_dir}/animal_avg_&_stdv.csv' #already filtered by whatever was used in animal_avgs.py
     normal_animal, non_normal_animal, anova_animal = compare_animal_means(animal_stats_fp, alpha)
     save(animal_stats_fp, normal_animal, non_normal_animal, anova_animal, "animal")
 

@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import IPython
 import numpy as np
-from useful_imports import import_kinematics, get_joints_and_segments, get_sampling_freq, get_rc_params
+from useful_imports import import_kinematics, get_joints_and_segments, get_sampling_freq, get_rc_params, exclude_trials
 
 def get_steps(stepcycle_df, h5_df):
     steps = []
@@ -239,7 +239,8 @@ def main(main_dir):
     plt.rcParams.update(rc_params)
 
     ##directories
-    step_table = pd.read_csv(f'{main_dir}/step_table.csv')
+    step_table_unfiltered = pd.read_csv(f'{main_dir}/step_table.csv')
+    step_table, excluded_trials = exclude_trials(step_table_unfiltered)
     step_table_grouped = step_table.groupby(['mouse-type', 'exp-type'])
     save_directory = f'{main_dir}/angle_graphs/toe_touch_aligned'
     if not os.path.exists(save_directory):
