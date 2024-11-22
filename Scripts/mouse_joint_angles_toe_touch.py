@@ -150,7 +150,7 @@ def graph_stats(mouse_id, mouse_data, steps_arr, avg_line, stdv_line, stat, max_
     #plt.show()
     plt.clf()
 
-    return
+    return save_folder
 
 def main(main_dir):
     """creates continuous stats for joint & sement angles aligned at toe touch and toe off"""
@@ -161,11 +161,14 @@ def main(main_dir):
     plt.rcParams.update(rc_params)
 
     step_table_grouped = step_table.groupby(['mouse-type', 'exp-type', 'mouse-id'])
+    save_folders = []
     for stat in stats:
-        print(stat)
         for mouse_id, mouse_data in step_table_grouped:
                 mouse_steps_arr, mouse_avg_line, mouse_stdv, max_toe_touch, max_length = get_stepwise_stats(mouse_id, mouse_data, stat)
-                graph_stats(mouse_id, mouse_data, mouse_steps_arr, mouse_avg_line, mouse_stdv, stat, max_toe_touch, max_length, main_dir, True)
+                save_folder = graph_stats(mouse_id, mouse_data, mouse_steps_arr, mouse_avg_line, mouse_stdv, stat, max_toe_touch, max_length, main_dir, True)
+                if save_folder not in save_folders:
+                    save_folders.append(save_folder)
+    print(f'saved_to: {save_folders}')
     
     return
 
