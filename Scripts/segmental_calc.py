@@ -1,5 +1,6 @@
 """
 calculate segmental angles throughout step cycle & add this data to h5 file
+for one trial
 """
 
 import pandas as pd
@@ -17,10 +18,10 @@ def calculate_segmental_angles(h5_path, segment_dict):
         lower_x = h5_df[f'{lower_joint}_x']
         lower_y = h5_df[f'{lower_joint}_y']
         radians_angle = np.arctan2((upper_y - lower_y), (upper_x - lower_x))
+        if segment == 'Thigh':
+            radians_angle = np.mod(radians_angle, 2 * np.pi) # Ensure the angle is within the range [0, 2π]
         degrees_angle = np.degrees(radians_angle)
         h5_df[f'{segment}_angle'] = degrees_angle
-        #adds column & calculates angles for shank
-        #radians by default
 
     #save new h5
     base_dir = os.path.dirname(os.path.dirname(h5_path))
@@ -39,7 +40,9 @@ def main():
                     "Thigh": ["Hip", "Knee"],
                     "Shank": ["Knee", "Ankle"]}
 
-    save_path = calculate_segmental_angles('Sample_data/WT_Levelwalk/h5_knee_fixed/gp3m3_1.h5', segment_dict)
+    og_h5_path = 'Full_data/V3Off_Levelwalk/h5_knee_fixed/gp15m2_left_1.h5'
+
+    save_path = calculate_segmental_angles(og_h5_path, segment_dict)
     print(save_path)
 
 
