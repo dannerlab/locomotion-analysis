@@ -10,7 +10,7 @@ from useful_imports import import_kinematics, get_joints_and_segments, get_sampl
 
 def get_steps(stepcycle_df, h5_df):
     steps = []
-    for idx in range(len(stepcycle_df)):
+    for idx in range(len(stepcycle_df)-1):
         step = h5_df.loc[stepcycle_df['stance-start-idx'].iloc[idx] : stepcycle_df['second-swing-stop-idx'].iloc[idx]].copy()
         step['abs-toe-off-idx'] = stepcycle_df['stance-stop-idx'].iloc[idx] #abs_toe_off_idx is the index where toe off occurs
         steps.append(step)
@@ -131,7 +131,7 @@ def get_steps_array(group, joint_or_seg):
     max_swing = max(max_swing_lengths) #max for whole group (of each mouse's max)
     max_stance = max(max_stance_lengths)
     max_length = max_swing + max_stance + 1 # this should probably be -1 based on my other script??
-    max_toe_touch_idx = max_swing + 1 #definitely not a good way of calculating this, shouldn't add 1
+    max_toe_off_idx = max_swing + 1 #definitely not a good way of calculating this, shouldn't add 1
 
     mouse_avg_steps = [] #list of avg lists for each trial
     trial_counter = 0 #to allow iteration through all_steps_in_group by absolute trial index regardless of mouse grouping
@@ -141,48 +141,58 @@ def get_steps_array(group, joint_or_seg):
             trial_steps_array = np.nan * np.ones((nums_steps[trial_counter], max_length)) #array to be fileld with all steps for this trial
             trial = all_steps_in_group[trial_counter] #all steps for this trial
             trial_counter += 1
-            for step_i, step in enumerate(trial): #the problem is that it is overwriting because step_i re-sets.. maybe? for some reason trial arrays after the first trial seem to be blank
-                #get indices aligned at toe touch
+            for step_i, step in enumerate(trial[:-1]): #iterates through all but last line in trial b/c no seccond-swing for last line
+                #get indices aligned at toe off
                 step['toe-off-adjusted-idx'] = step['abs-idx'] - step['abs-toe-off-idx']    #abs_idx is index for each segment of the step,
                                                                                                     #abs_toe_off_idx is index where toe off occurs,
-                                                                                                    #so toe_off_adjusted idx allows alignment at toe touch
+                                                                                                    #so toe_off_adjusted idx allows alignment at toe off
 
                 #establish stats about this particular step
                 step_toe_off = step['abs-toe-off-idx'].tolist()[0]
                 #print(f'step[abs-toe-off-idx]: {step["abs-toe-off-idx"].tolist()}') # list of the abs-toe-off-idx for each step in this trial
-                print(f'step_toe_off: {step_toe_off}')
-                print(f'step[abs-idx]: {step["abs-idx"].tolist()}')
-                print()
+                #print(f'step_toe_off: {step_toe_off}')
+                #print(f'step[abs-idx]: {step["abs-idx"].tolist()}')
                 step_stance_length = step_toe_off - step['abs-idx'].tolist()[0]
-                print(f'step_stance_length: {step_stance_length}')
+                #print(f'step_stance_length: {step_stance_length}')
                 step_swing_length = step['abs-idx'].tolist()[-1]- step_toe_off
-                print(f'step_swing_length: {step_swing_length}')
+                #print(f'step_swing_length: {step_swing_length}')
 
                 #pad relative to longest phase of steps in the group
                 #np.empty(np.nan(max_length, 1))
                 stance_zeros = np.nan*(np.ones(max_stance - step_stance_length))
-                print(f'stance_zeros length: {len(stance_zeros)}')
-                print(f'swing_zeros length: {max_swing - step_swing_length}')
-                print(f'group: {group}, mouse: {id}, trial: {trial_i}, step: {step_i}') #glitch with last step of the trial (as anticipated)
+                # print(f'stance_zeros length: {len(stance_zeros)}')
+                # print(f'swing_zeros length: {max_swing - step_swing_length}')
+                # print(f'group: {group}, mouse: {id}, trial: {trial_i}, step: {step_i}') #glitch with last step of the trial (as anticipated)
                 swing_zeros = np.nan*(np.ones(max_swing - step_swing_length)) 
-                zeroed_joint_angle = list(stance_zeros) + list(step[f'{joint_or_seg}']) + list(swing_zeros)
-                print(f'zeroed_joint_angle: {zeroed_joint_angle}')
+                zeroed_joint_angle = list(stance_zeros) + list(step[f'{joint_or_seg}']) + list(swing_zeros) #confirmed
+                #print(f'zeroed_joint_angle: {zeroed_joint_angle}')
                 trial_steps_array[step_i] = zeroed_joint_angle #add this step to the array of all steps for this trial
+                # print(trial_steps_array[step_i])
+                if np.all(np.isnan(trial_steps_array[step_i])):
+                    print(f'nan step: {step_i}')
             mouse_trials_list.append(trial_steps_array) #add this array to the list of all arrays for all trials in the group
-        
+            for array in mouse_trials_list:
+                # for line in array:
+                #     print(line)
+                if np.all(np.isnan(array)):
+                    print('nan array')
         #combine all trials into one array for the mouse that contains all steps (think concat; eliminate trial data)
-        mouse_trials_arr = np.nan * np.ones((len(mouse), max_length))
+        mouse_trials_arr = np.nan * np.ones((len(mouse) - 1, max_length))
         step_i = 0
         trial_i = 0
         for trial in mouse_trials_list: #remember each trial is a list of arrays
+            # print(f'trial: {trial}') #confirmed trial is fine
             trial_i += 1
-            for step in trial:
+            for step in trial[:-1]: #confirmed step is fine
+                # print(step)
                 mouse_trials_arr[step_i] = step
                 step_i += 1
-        
+
+        print(mouse_trials_arr)
         #find avg step for the mouse
         avg_mouse_step = np.mean(mouse_trials_arr, axis = 0)
-
+        # if np.all(np.isnan(avg_mouse_step)):
+        #     print(f'avg_mouse_step {id} is nan')
         #list of avg steps by mouse
         mouse_avg_steps.append(avg_mouse_step)
         
@@ -190,10 +200,9 @@ def get_steps_array(group, joint_or_seg):
     group_avg_step = np.mean(mouse_avg_steps, axis=0)
     group_stdv = np.std(mouse_avg_steps, axis=0)
 
+    return mouse_avg_steps, group_avg_step, max_toe_off_idx, max_length, group_stdv
 
-    return mouse_avg_steps, group_avg_step, max_toe_touch_idx, max_length, group_stdv
-
-def graph(mouse_avg_steps, group_avg_step, group_name, max_toe_touch_idx, joint_or_seg, save_directory, max_length, group, group_stdv):
+def graph(mouse_avg_steps, group_avg_step, group_name, max_toe_off_idx, joint_or_seg, save_directory, max_length, group, group_stdv):
     plt.clf()
     #colors for multicolor
     num_colors = len(mouse_avg_steps)
@@ -211,17 +220,17 @@ def graph(mouse_avg_steps, group_avg_step, group_name, max_toe_touch_idx, joint_
     #x axis values
     #x calculations
     sampling_freq = get_sampling_freq()
-    max_toe_touch_time = max_toe_touch_idx/sampling_freq
-    time_vec = np.linspace(0.0, max_length/sampling_freq, max_length) - max_toe_touch_time
+    max_toe_off_time = max_toe_off_idx/sampling_freq
+    time_vec = np.linspace(0.0, max_length/sampling_freq, max_length) - max_toe_off_time
 
     #plot avg for each mouse within group + group avg line
     plt.ylim([0, 180])
     mouse_wise_grouped = group.groupby('mouse-id')
-    mouse_ids = list(mouse_wise_grouped.groups.keys())
+    #mouse_ids = list(mouse_wise_grouped.groups.keys())
     for mouse_i, mouse in enumerate(mouse_avg_steps):
         #plt.plot(time_vec, mouse, color = colors[mouse_i], alpha = .75, label = mouse_ids[mouse_i]) #uncomment for color for each mouse, comment next line
         plt.plot(time_vec, mouse, color = 'grey', alpha = 0.25) #uncomment for grey for each mouse, comment above line
-    plt.axvline(time_vec[max_toe_touch_idx], color = 'black', linestyle = '--')
+    plt.axvline(time_vec[max_toe_off_idx], color = 'black', linestyle = '--')
     plt.plot(time_vec, group_avg_step, color = group_color, linewidth = 2)
     upper = group_avg_step + group_stdv
     lower = group_avg_step - group_stdv
@@ -229,7 +238,7 @@ def graph(mouse_avg_steps, group_avg_step, group_name, max_toe_touch_idx, joint_
     plt.xlabel('Time of step (s)')
     plt.ylabel(f'{joint_or_seg} (\u00B0)')
     #plt.legend() #uncomment for mousewise colors
-    plt.xlim([-0.2, 0.35])
+    plt.xlim([-0.35, 0.2])
     if joint_or_seg == "Shank_angle":
         plt.ylim([-30, 150])
 
@@ -252,7 +261,7 @@ def main(main_dir):
     step_table_unfiltered = pd.read_csv(f'{main_dir}/step_table.csv')
     step_table, excluded_trials = exclude_trials(step_table_unfiltered)
     step_table_grouped = step_table.groupby(['mouse-type', 'exp-type'])
-    save_directory = f'{main_dir}/angle_graphs/toe_touch_aligned'
+    save_directory = f'{main_dir}/angle_graphs/toe_off_aligned'
     if not os.path.exists(save_directory):
         os.makedirs(save_directory, exist_ok = True)
 
@@ -261,8 +270,8 @@ def main(main_dir):
         group_name = '_'.join(group) #should be something like WT_Levelwalk
         #print(group_name)
         for joint_or_seg in joint_seg_names:
-            mouse_avg_steps, group_avg_step, max_toe_touch_idx, max_length, group_stdv = get_steps_array(group_data, joint_or_seg)
-            save_dir = graph(mouse_avg_steps, group_avg_step, group_name, max_toe_touch_idx, joint_or_seg, save_directory, max_length, group_data, group_stdv)
+            mouse_avg_steps, group_avg_step, max_toe_off_idx, max_length, group_stdv = get_steps_array(group_data, joint_or_seg)
+            save_dir = graph(mouse_avg_steps, group_avg_step, group_name, max_toe_off_idx, joint_or_seg, save_directory, max_length, group_data, group_stdv)
         print(save_dir)
 if __name__ == "__main__":
     main('Full_data')
