@@ -140,7 +140,7 @@ def graph_stats(mouse_id, mouse_data, steps_arr, avg_line, stdv_line, stat, max_
     if trial_colors:
         plt.legend()
     plt.ylabel(stat)
-    plt.xlabel('time (ms)')
+    plt.xlabel('time (s)')
     mouse_group = '_'.join(mouse_id[0:2])
     save_folder = os.path.join(main_dir, 'angle_graphs', 'toe_touch_aligned', mouse_group)
     if not os.path.exists(save_folder):
