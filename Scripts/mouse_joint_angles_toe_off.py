@@ -137,6 +137,11 @@ def graph_stats(mouse_id, mouse_data, steps_arr, avg_line, stdv_line, stat, max_
     if trial_colors:
         plt.legend()
     plt.ylabel(stat)
+    plt.ylim([0, 180])
+    plt.yticks(np.arange(0, 181, 30))
+    if stat in ['Shank_angle', 'Crest_angle']:
+        plt.ylim([-30, 150])
+        plt.yticks(np.arange(-30, 151, 30))
     plt.xlabel('time (s)')
     mouse_group = '_'.join(mouse_id[0:2])
     save_folder = os.path.join(main_dir, 'angle_graphs', 'toe_off_aligned', mouse_group)
