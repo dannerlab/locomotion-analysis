@@ -130,8 +130,8 @@ def get_steps_array(group, joint_or_seg):
 
     max_swing = max(max_swing_lengths) #max for whole group (of each mouse's max)
     max_stance = max(max_stance_lengths)
-    max_length = max_swing + max_stance + 1 # this should probably be -1 based on my other script??
-    max_toe_touch_idx = max_swing + 1 #definitely not a good way of calculating this, shouldn't add 1
+    max_length = max_swing + max_stance - 1 
+    max_toe_touch_idx = max_swing
 
     mouse_avg_steps = [] #list of avg lists for each trial
     trial_counter = 0 #to allow iteration through all_steps_in_group by absolute trial index regardless of mouse grouping
@@ -154,8 +154,8 @@ def get_steps_array(group, joint_or_seg):
 
                 #pad relative to longest phase of steps in the group
                 #np.empty(np.nan(max_length, 1))
-                swing_zeros = np.nan*(np.ones(max_swing - step_swing_length)) 
-                stance_zeros = np.nan*(np.ones(max_stance - step_stance_length))
+                swing_zeros = np.nan*(np.ones(max_swing - step_swing_length - 1))
+                stance_zeros = np.nan*(np.ones(max_stance - step_stance_length - 1))
                 zeroed_joint_angle = list(swing_zeros) + list(step[f'{joint_or_seg}']) + list(stance_zeros)
                 trial_steps_array[step_i] = zeroed_joint_angle #add this step to the array of all steps for this trial
             mouse_trials_list.append(trial_steps_array) #add this array to the list of all arrays for all trials in the group
