@@ -244,7 +244,7 @@ def graph(mouse_avg_steps, group_avg_step, group_name, max_toe_off_idx, joint_or
     plt.ylabel(f'{joint_or_seg} (\u00B0)')
     #plt.legend() #uncomment for mousewise colors
     plt.xlim([-0.35, 0.2])
-    if joint_or_seg == "Shank_angle":
+    if joint_or_seg in ['Shank_angle', 'Crest_angle']:
         plt.ylim([-30, 150])
         plt.yticks([-30, 0, 30, 60, 90, 120, 150], labels=None)
 
