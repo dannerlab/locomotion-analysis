@@ -51,6 +51,7 @@ def get_steps_array(group, joint_or_seg):
     #for each mouse in the group
     for id, mouse_data in mouse_wise_grouped: #things inside this loop done for all steps of a given mouse, but only for one mouse at a time
 
+        #get mouse stepcycle & h5s
         mouse_stepcycles = []
         mouse_h5s = []
         trial_grouped = mouse_data.groupby('trial-number')
@@ -61,6 +62,7 @@ def get_steps_array(group, joint_or_seg):
             mouse_stepcycles.append(stepcycle)
             mouse_h5s.append(h5)
         
+        #find maximum step, stance, and swing lengths for the mouse
         step_lengths = []
         stance_lengths = []
         swing_lengths = []
@@ -77,7 +79,7 @@ def get_steps_array(group, joint_or_seg):
             mouse_swings.append(swings)
             all_steps_in_group.append(steps) #add it to the whole group
             all_stances_in_group.append(stances)
-            all_swings_in_group.append(swings) 
+            all_swings_in_group.append(swings)
 
         max_step_length = 0
         max_stance_length = 0
@@ -113,8 +115,7 @@ def get_steps_array(group, joint_or_seg):
                     max_stance_length = stance_length
                     max_stance_index = stance_i
             
-            
-
+        
         max_step_lengths.append(max(step_lengths))
         max_step_indices.append(max_step_index)
 
@@ -123,25 +124,23 @@ def get_steps_array(group, joint_or_seg):
 
         max_stance_lengths.append(max(stance_lengths))
         max_stance_indices.append(max_stance_index)
+    #end for each mouse loop
 
-
-
-    ##make nice tables: length is number of steps, width is max length of any step
-
-    max_swing = max(max_swing_lengths) #max for whole group (of each mouse's max)
+    # make nice tables: length is number of steps, width is max length of any step
     max_stance = max(max_stance_lengths)
-    max_length = max_swing + max_stance + 1 # this should probably be -1 based on my other script??
-    max_toe_off_idx = max_swing + 1 #definitely not a good way of calculating this, shouldn't add 1
+    max_swing = max(max_swing_lengths) #max for whole group (of each mouse's max)
+    max_length = max_swing + max_stance - 1 # remove 1 or else toe off is double counted
+    max_toe_off_idx = max_stance
 
     mouse_avg_steps = [] #list of avg lists for each trial
     trial_counter = 0 #to allow iteration through all_steps_in_group by absolute trial index regardless of mouse grouping
     for id, mouse in mouse_wise_grouped: #for each mouse in the group
         mouse_trials_list = [] #list to be filled with all trial arrays for this mouse
         for trial_i in mouse['trial-number'].unique(): #for each trial in the mouse
-            trial_steps_array = np.nan * np.ones((nums_steps[trial_counter], max_length)) #array to be fileld with all steps for this trial
-            trial = all_steps_in_group[trial_counter] #all steps for this trial
+            trial_steps_array = np.nan * np.ones((nums_steps[trial_counter], max_length)) #array to be filled with all steps for this trial
+            trial = all_steps_in_group[trial_counter] #need to use the h5 from all_steps_in_group with abs-idx col added; 1 step b/c toe off is already excluded
             trial_counter += 1
-            for step_i, step in enumerate(trial[:-1]): #iterates through all but last line in trial b/c no seccond-swing for last line
+            for step_i, step in enumerate(trial): #iterates through all b/c last seccond-swing is already filtered out
                 #get indices aligned at toe off
                 step['toe-off-adjusted-idx'] = step['abs-idx'] - step['abs-toe-off-idx']    #abs_idx is index for each segment of the step,
                                                                                                     #abs_toe_off_idx is index where toe off occurs,
@@ -159,11 +158,11 @@ def get_steps_array(group, joint_or_seg):
 
                 #pad relative to longest phase of steps in the group
                 #np.empty(np.nan(max_length, 1))
-                stance_zeros = np.nan*(np.ones(max_stance - step_stance_length))
+                stance_zeros = np.nan*(np.ones(max_stance - step_stance_length - 1))
                 # print(f'stance_zeros length: {len(stance_zeros)}')
                 # print(f'swing_zeros length: {max_swing - step_swing_length}')
                 # print(f'group: {group}, mouse: {id}, trial: {trial_i}, step: {step_i}') #glitch with last step of the trial (as anticipated)
-                swing_zeros = np.nan*(np.ones(max_swing - step_swing_length)) 
+                swing_zeros = np.nan*(np.ones(max_swing - step_swing_length - 1))
                 zeroed_joint_angle = list(stance_zeros) + list(step[f'{joint_or_seg}']) + list(swing_zeros) #confirmed
                 #print(f'zeroed_joint_angle: {zeroed_joint_angle}')
                 trial_steps_array[step_i] = zeroed_joint_angle #add this step to the array of all steps for this trial
@@ -172,27 +171,32 @@ def get_steps_array(group, joint_or_seg):
                     print(f'nan step: {step_i}')
             mouse_trials_list.append(trial_steps_array) #add this array to the list of all arrays for all trials in the group
             for array in mouse_trials_list:
-                # for line in array:
-                #     print(line)
+                for line in array:
+                    if np.all(np.isnan((line))):
+                        print('nan line')
                 if np.all(np.isnan(array)):
-                    print('nan array')
+                    print(f'nan array: {id}')
         #combine all trials into one array for the mouse that contains all steps (think concat; eliminate trial data)
-        mouse_trials_arr = np.nan * np.ones((len(mouse) - 1, max_length))
+        trial_n = len(mouse_trials_list)
+        mouse_trials_arr = np.nan * np.ones((len(mouse) - (1 * trial_n), max_length))
         step_i = 0
         trial_i = 0
         for trial in mouse_trials_list: #remember each trial is a list of arrays
             # print(f'trial: {trial}') #confirmed trial is fine
             trial_i += 1
-            for step in trial[:-1]: #confirmed step is fine
+            for step in trial: #confirmed step is fine
                 # print(step)
                 mouse_trials_arr[step_i] = step
                 step_i += 1
 
-        print(mouse_trials_arr)
         #find avg step for the mouse
-        avg_mouse_step = np.mean(mouse_trials_arr, axis = 0)
-        # if np.all(np.isnan(avg_mouse_step)):
-        #     print(f'avg_mouse_step {id} is nan')
+        try:
+            avg_mouse_step = np.mean(mouse_trials_arr, axis = 0)
+        except RuntimeWarning:
+            if np.all(np.isnan(np.mean(mouse_trials_arr, axis = 0))): #checks if avg_mouse_step would be all nan and that is causing the error
+                print(f'avg_mouse_step {id} is nan')
+            else:
+                print('other RuntimeWarning')
         #list of avg steps by mouse
         mouse_avg_steps.append(avg_mouse_step)
         
@@ -225,6 +229,7 @@ def graph(mouse_avg_steps, group_avg_step, group_name, max_toe_off_idx, joint_or
 
     #plot avg for each mouse within group + group avg line
     plt.ylim([0, 180])
+    plt.yticks([0, 30, 60, 90, 120, 150, 180], labels=None)
     mouse_wise_grouped = group.groupby('mouse-id')
     #mouse_ids = list(mouse_wise_grouped.groups.keys())
     for mouse_i, mouse in enumerate(mouse_avg_steps):
@@ -241,11 +246,12 @@ def graph(mouse_avg_steps, group_avg_step, group_name, max_toe_off_idx, joint_or
     plt.xlim([-0.35, 0.2])
     if joint_or_seg == "Shank_angle":
         plt.ylim([-30, 150])
+        plt.yticks([-30, 0, 30, 60, 90, 120, 150], labels=None)
 
-    #save & display
+    # save & display
     save_name = os.path.join(save_directory, f'{group_name}_{joint_or_seg}_all_trials')
     plt.savefig(f'{save_name}.png')
-    #plt.show()
+    # plt.show()
     return save_directory
 
 def main(main_dir):

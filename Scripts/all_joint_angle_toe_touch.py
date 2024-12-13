@@ -206,6 +206,7 @@ def graph(mouse_avg_steps, group_avg_step, group_name, max_toe_touch_idx, joint_
 
     #plot avg for each mouse within group + group avg line
     plt.ylim([0, 180])
+    plt.yticks([0, 30, 60, 90, 120, 150, 180], labels=None)
     mouse_wise_grouped = group.groupby('mouse-id')
     mouse_ids = list(mouse_wise_grouped.groups.keys())
     for mouse_i, mouse in enumerate(mouse_avg_steps):
@@ -222,6 +223,7 @@ def graph(mouse_avg_steps, group_avg_step, group_name, max_toe_touch_idx, joint_
     plt.xlim([-0.2, 0.35])
     if joint_or_seg == "Shank_angle":
         plt.ylim([-30, 150])
+        plt.yticks([-30, 0, 30, 60, 90, 120, 150], labels=None)
 
     #save & display
     save_name = os.path.join(save_directory, f'{group_name}_{joint_or_seg}_all_trials')
