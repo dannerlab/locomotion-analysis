@@ -41,9 +41,8 @@ def add_position_stats(step_table, slicing_dict):
 
                     step_table.at[step_i, f'{phase}-{stat}-min'] = min(step_slice[stat])
                     step_table.at[step_i, f'{phase}-{stat}-max'] = max(step_slice[stat])
-                    step_table[f'{phase}-{stat}-end'] = step_slice[stat].iloc[-1]
+                    step_table.at[step_i, f'{phase}-{stat}-end'] = step_slice[stat].tolist()[-1]
                     step_table[f'{phase}-{stat}-excursion'] = step_table[f'{phase}-{stat}-max'] - step_table[f'{phase}-{stat}-min']
-
                 except ValueError:
                     print(ValueError)
                     print(f'h5 path: {h5_path}')
@@ -132,7 +131,8 @@ def calc_segmental_stats(step_table, segment_dict, slicing_dict):
 
 def main():
     #this is for testing the functions, should be called by step_table_initialize
-    step_table = pd.read_csv("Sample_data/step_table.csv")
+    #does not save anything, so test away!
+    step_table = pd.read_csv("Full_data/step_table.csv")
     joint_angles = ["Hip_angle", "Knee_angle", "Ankle_angle", "MTP_angle"]
     segment_dict = {"Crest": ["IliacCrest", "Hip"],
                     "Thigh": ["Hip", "Knee"],
@@ -140,13 +140,16 @@ def main():
     slicing_dict = {"step": ['swing-start-idx', 'stance-stop-idx'],
                     "swing": ['swing-start-idx', 'swing-stop-idx'],
                     "stance": ['stance-start-idx', 'stance-stop-idx'],
-                    #"step-toe-touch-idx": ['stance-start-idx', 'second-swing-stop-idx'],
+                    #"step-toe-off-idx": ['stance-start-idx', 'second-swing-stop-idx'],
                     #"e1",
                     #"e2",
                     #"e3",
-                    #"e4"
+                    #"e4",
+                    #hip_flexion: ['hip-flex-start-idx', 'hip-flex-stop-idx'],
+                    #hip_extension: ['hip-ext-start-idx', 'hip-ext-stop-idx'],
                     }
-    step_table_updated = calc_segmental_stats(step_table, segment_dict, slicing_dict)
+    step_table_updated = add_position_stats(step_table, slicing_dict)
+    # step_table_updated = calc_segmental_stats(step_table, segment_dict, slicing_dict)
     print(step_table_updated.columns)
     print(step_table_updated.iloc[:15, -5:])
     print(step_table_updated.shape)
