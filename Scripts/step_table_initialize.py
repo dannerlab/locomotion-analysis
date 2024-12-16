@@ -17,10 +17,10 @@ import IPython
 warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
 #Helper functions
 
-def closest(list, num):
-    list = np.asarray(list)
-    idx = (np.abs(list - num)).argmin()
-    return list[idx]
+def closest(lst, num):
+    lst = np.asarray(lst)
+    idx = (np.abs(lst - num)).argmin()
+    return lst[idx]
 
 def get_indices(h5_df, cycle_df, cycle_key):
     num_steps = len(cycle_df)
