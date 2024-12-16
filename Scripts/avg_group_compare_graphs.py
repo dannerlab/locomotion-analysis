@@ -13,14 +13,15 @@ plt.rcParams.update(rc_params)
 
 def set_ylim(stat):
 
-    ylims = {
+    ylims = { #name: (ymin_avg, ymax_avg, ymin_stdv, ymax_stdv)
         'duration': (0, 0.5, 0, 0.15),
         'duty-factor': (0, 1, 0, 0.1), #wants to be up to .75 for both
         'x-excursion': (0, 55, 0, 10),
         'y-excursion': (0, 20, 0, 3),
         'Hip_to_Toe_x-max': (0, 50, 0, 10),
         'Hip_to_Toe_x-min': (-50, 0, 0, 10),
-        'Hip_to_Toe_x-excursion': (0, 50, 0, 10)
+        'Hip_to_Toe_x-excursion': (0, 50, 0, 10),
+        'Hip_angle-excursion': (0, 60, 0, 20),
          }
 
     specific_ylims = { #default values
@@ -61,7 +62,8 @@ def set_ylabel(stat):
                         'duty-factor': 'Duty Factor',
                         'step-Hip_to_Toe_x-max': 'Hip to Toe x Max (mm)',
                         'step-Hip_to_Toe_x-min': 'Hip to Toe x Min (mm)',
-                        'step-Hip_to_Toe_x-excursion': 'Hip to Toe x Excursion (mm)'}
+                        'step-Hip_to_Toe_x-excursion': 'Hip to Toe x Excursion (mm)',
+                        'step-Hip_angle-excursion': 'Hip Angle Excursion (degrees)',}
     try:
         return stat_labels[stat]
     except KeyError:  
@@ -128,7 +130,8 @@ def main(main_dir):
             #'step-ToeTip_x-max', 'step-ToeTip_x-min',
             'step-IliacCrest_y-excursion',
             'duty-factor',
-            'step-Hip_to_Toe_x-max', 'step-Hip_to_Toe_x-min', 'step-Hip_to_Toe_x-excursion'] 
+            'step-Hip_to_Toe_x-max', 'step-Hip_to_Toe_x-min', 'step-Hip_to_Toe_x-excursion',
+            'step-Hip_angle-excursion'] 
             #add more stats, should match column labels for animal_avg_and_stdv.csv without the 'avg'/ 'stdv' prefix
             #advised to augment the y limits dictionary at top of script when you add more stats
             #should also augment y labels dictionary when you add a stat
