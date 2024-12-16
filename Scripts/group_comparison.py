@@ -140,6 +140,7 @@ def compare_animal_means(animal_stats_fp, alpha):
 
 def compare_step_cycles(step_table_fp, alpha):
     """ Compares 2+ groups based on step cycle level data """
+
     step_table_unfiltered = pd.read_csv(step_table_fp)
     step_table, excluded_trials = exclude_trials(step_table_unfiltered)
     step_table_grouped = step_table.groupby(['mouse-type', 'exp-type'])
@@ -185,10 +186,10 @@ def main(main_dir):
     normal_animal, non_normal_animal, anova_animal = compare_animal_means(animal_stats_fp, alpha)
     save(animal_stats_fp, normal_animal, non_normal_animal, anova_animal, "animal")
 
-    #by step cycle
-    step_table_fp = f'{main_dir}/step_table.csv'
-    normal_stats, non_normal_stats, one_way_p = compare_step_cycles(step_table_fp, alpha)
-    save(step_table_fp, normal_stats, non_normal_stats, one_way_p, "")
+    # by step cycle: should do in jupyter notebook or R
+    # step_table_fp = f'{main_dir}/step_table.csv'
+    # normal_stats, non_normal_stats, one_way_p = compare_step_cycles(step_table_fp, alpha)
+    # save(step_table_fp, normal_stats, non_normal_stats, one_way_p, "")
 
     return
 
