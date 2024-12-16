@@ -142,7 +142,7 @@ def get_steps_array(group, joint_or_seg):
             trial_counter += 1
             for step_i, step in enumerate(trial): #iterates through all b/c last seccond-swing is already filtered out
                 #get indices aligned at toe off
-                step['toe-off-adjusted-idx'] = step['abs-idx'] - step['abs-toe-off-idx']    #abs_idx is index for each segment of the step,
+                step['toe-off-adjusted-idx'] = step['abs-idx'] - step['abs-toe-off-idx']  #abs_idx is index for each segment of the step,
                                                                                                     #abs_toe_off_idx is index where toe off occurs,
                                                                                                     #so toe_off_adjusted idx allows alignment at toe off
 
@@ -225,8 +225,7 @@ def graph_one_group(mouse_avg_steps, group_avg_step, group_name, max_toe_off_idx
     #x calculations
     sampling_freq = get_sampling_freq()
     max_toe_off_time = max_toe_off_idx/sampling_freq
-    time_vec = np.linspace(0.0, max_length/sampling_freq, max_length) - max_toe_off_time
-
+    time_vec = np.linspace(0.0, (max_length - 1)/sampling_freq, max_length) - max_toe_off_time
     #plot avg for each mouse within group + group avg line
     plt.ylim([0, 180])
     plt.yticks([0, 30, 60, 90, 120, 150, 180], labels=None)
@@ -264,7 +263,7 @@ def graph_many_groups(steps_arrays_dicts_list, joint_or_seg, save_directory):
         max_length = steps_arrays_dicts_list[group_i]['max_length'] 
         max_toe_off_idx = steps_arrays_dicts_list[group_i]['max_toe_off_idx']
         max_toe_off_time = max_toe_off_idx/sampling_freq
-        time_vec = np.linspace(0.0, max_length/sampling_freq, max_length) - max_toe_off_time
+        time_vec = np.linspace(0.0, (max_length - 1)/sampling_freq, max_length) - max_toe_off_time
 
         #colors for groups if it is WT vs V3Off
         group_avg_step = group_dict['group_avg_step']

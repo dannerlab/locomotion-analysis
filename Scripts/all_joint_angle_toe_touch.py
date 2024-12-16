@@ -201,7 +201,7 @@ def graph_one_group(mouse_avg_steps, group_avg_step, group_name, max_toe_touch_i
     #x calculations
     sampling_freq = get_sampling_freq()
     max_toe_touch_time = max_toe_touch_idx/sampling_freq
-    time_vec = np.linspace(0.0, max_length/sampling_freq, max_length) - max_toe_touch_time
+    time_vec = np.linspace(0.0, (max_length - 1)/sampling_freq, max_length) - max_toe_touch_time
 
     #plot avg for each mouse within group + group avg line
     mouse_wise_grouped = group.groupby('mouse-id')
@@ -243,7 +243,7 @@ def graph_many_groups(steps_arrays_dicts_list, joint_or_seg, save_directory):
         max_length = steps_arrays_dicts_list[group_i]['max_length'] 
         max_toe_touch_idx = steps_arrays_dicts_list[group_i]['max_toe_touch_idx']
         max_toe_touch_time = max_toe_touch_idx/sampling_freq
-        time_vec = np.linspace(0.0, max_length/sampling_freq, max_length) - max_toe_touch_time
+        time_vec = np.linspace(0.0, (max_length - 1)/sampling_freq, max_length) - max_toe_touch_time
 
         #colors for groups if it is WT vs V3Off
         group_avg_step = group_dict['group_avg_step']

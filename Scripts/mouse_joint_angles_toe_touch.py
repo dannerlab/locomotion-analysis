@@ -115,7 +115,7 @@ def graph_stats(mouse_id, mouse_data, steps_arr, avg_line, stdv_line, stat, max_
     #get x-axis for trial
     sampling_freq = get_sampling_freq()
     max_toe_touch_time = max_toe_touch/sampling_freq
-    time_vec = np.linspace(0.0, max_length/sampling_freq, max_length) - max_toe_touch_time
+    time_vec = np.linspace(0.0, (max_length - 1)/sampling_freq, max_length) - max_toe_touch_time
 
     #plot steps
     abs_step_i = 0
