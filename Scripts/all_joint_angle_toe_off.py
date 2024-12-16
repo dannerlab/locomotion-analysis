@@ -206,7 +206,7 @@ def get_steps_array(group, joint_or_seg):
 
     return mouse_avg_steps, group_avg_step, max_toe_off_idx, max_length, group_stdv
 
-def graph(mouse_avg_steps, group_avg_step, group_name, max_toe_off_idx, joint_or_seg, save_directory, max_length, group, group_stdv):
+def graph_one_group(mouse_avg_steps, group_avg_step, group_name, max_toe_off_idx, joint_or_seg, save_directory, max_length, group, group_stdv):
     plt.clf()
     #colors for multicolor
     num_colors = len(mouse_avg_steps)
@@ -254,6 +254,66 @@ def graph(mouse_avg_steps, group_avg_step, group_name, max_toe_off_idx, joint_or
     # plt.show()
     return save_directory
 
+def graph_many_groups(steps_arrays_dicts_list, joint_or_seg, save_directory):
+    plt.clf()
+
+    #color, plot, & label each group
+    for group_i, group_dict in enumerate(steps_arrays_dicts_list):
+        #x axis values
+        sampling_freq = get_sampling_freq()
+        max_length = steps_arrays_dicts_list[group_i]['max_length'] 
+        max_toe_off_idx = steps_arrays_dicts_list[group_i]['max_toe_off_idx']
+        max_toe_off_time = max_toe_off_idx/sampling_freq
+        time_vec = np.linspace(0.0, max_length/sampling_freq, max_length) - max_toe_off_time
+
+        #colors for groups if it is WT vs V3Off
+        group_avg_step = group_dict['group_avg_step']
+        group = group_dict['group']
+        if len(steps_arrays_dicts_list) == 2:
+            if group[0] == 'WT':
+                group_color = 'blue'
+            elif group[0] == 'V3Off':
+                group_color = 'red'
+            else:
+                group_color = 'orange'
+
+        #colors for multicolor
+        else:
+            num_colors = len(steps_arrays_dicts_list)
+            cmap = plt.get_cmap('turbo')
+            colors = [cmap(i/num_colors) for i in range(num_colors)]
+            group_color = colors[group_i]
+
+        #name & plot
+        group_name = group_dict['group_name']
+        for mouse_i, mouse in enumerate(group_dict['mouse_avg_steps']): #plot mice avg in group, may or may not be useful
+            plt.plot(time_vec, mouse, color = group_color, alpha = 0.25)
+        plt.plot(time_vec, group_avg_step, color = group_color, label = group_name) #plot group avg
+        group_stdv = group_dict['group_stdv']
+        upper = group_avg_step + group_stdv
+        lower = group_avg_step - group_stdv
+        plt.fill_between(time_vec, lower, upper, color = group_color, alpha = 0.2)
+
+    plt.axvline(time_vec[max_toe_off_idx], color = 'black', linestyle = '--') #plot toe off line
+    plt.xlabel('Time of step (s)')
+    plt.ylabel(f'{joint_or_seg} (\u00B0)')
+    plt.legend()
+    plt.xlim([-0.2, 0.35])
+    plt.ylim([0, 180])
+    plt.yticks(np.arange(0, 181, 30), labels=None)
+    if joint_or_seg == "Shank_angle" or joint_or_seg == "Crest_angle":
+        plt.ylim([-30, 150])
+        plt.yticks(np.arange(-30, 151, 30), labels=None)
+    if joint_or_seg == "Thigh_angle":
+        plt.ylim([30, 210])
+        plt.yticks(np.arange(30, 211, 30), labels=None)
+
+    #save & display
+    group_names = '_'.join([group_dict['group_name'] for group_dict in steps_arrays_dicts_list])
+    save_name = os.path.join(save_directory, f'{joint_or_seg}_{group_names}')
+    plt.savefig(f'{save_name}.png')
+    #plt.show()
+
 def main(main_dir):
     #set up statistics names & rc params
     joints_and_segments = get_joints_and_segments()
@@ -266,18 +326,42 @@ def main(main_dir):
     ##directories
     step_table_unfiltered = pd.read_csv(f'{main_dir}/step_table.csv')
     step_table, excluded_trials = exclude_trials(step_table_unfiltered)
-    step_table_grouped = step_table.groupby(['mouse-type', 'exp-type'])
+    step_table_grouped_all_groups = step_table.groupby(['mouse-type', 'exp-type'])
+    selected_groups = [('WT', 'Levelwalk'), ('V3Off', 'Levelwalk')]
+    if selected_groups != step_table_grouped_all_groups.groups.keys():
+        step_table_selected = [step_table_grouped_all_groups.get_group(group) for group in selected_groups]
+        step_table_grouped = pd.concat(step_table_selected).groupby(['mouse-type', 'exp-type'])
+        print(f'selected groups: {step_table_grouped.groups.keys()}')
     save_directory = f'{main_dir}/angle_graphs/toe_off_aligned'
     if not os.path.exists(save_directory):
         os.makedirs(save_directory, exist_ok = True)
 
     #actually make the graphs
-    for group, group_data in step_table_grouped:
-        group_name = '_'.join(group) #should be something like WT_Levelwalk
-        #print(group_name)
-        for joint_or_seg in joint_seg_names:
+    save_dirs = []
+    for joint_or_seg in joint_seg_names:
+        steps_arrays_dicts_list = []
+        for group, group_data in step_table_grouped:
+            group_name = '_'.join(group) #should be something like WT_Levelwalk
             mouse_avg_steps, group_avg_step, max_toe_off_idx, max_length, group_stdv = get_steps_array(group_data, joint_or_seg)
-            save_dir = graph(mouse_avg_steps, group_avg_step, group_name, max_toe_off_idx, joint_or_seg, save_directory, max_length, group_data, group_stdv)
-        print(save_dir)
+            save_dir = graph_one_group(mouse_avg_steps, group_avg_step, group_name, max_toe_off_idx, joint_or_seg, save_directory, max_length, group_data, group_stdv)
+            if save_dir not in save_dirs:
+                save_dirs.append(save_dir)
+            steps_arrays_dict = {'group': group,
+                                'group_data': group_data,
+                                'group_name': group_name,
+                                'mouse_avg_steps': mouse_avg_steps,
+                                'group_avg_step': group_avg_step,
+                                'max_toe_off_idx': max_toe_off_idx,
+                                'max_length': max_length,
+                                'group_stdv': group_stdv,
+                                }
+            steps_arrays_dicts_list.append(steps_arrays_dict)
+        
+        graph_many_groups(steps_arrays_dicts_list, joint_or_seg, save_directory)
+    
+    for save_dir in save_dirs:
+        print(f'saved to: {save_dir}')
+
+
 if __name__ == "__main__":
     main('Full_data')
