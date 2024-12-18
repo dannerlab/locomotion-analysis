@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 from stepwise_data_calc import calc_discrete_stats, add_second_swing, calc_joint_angle_stats, calc_segmental_stats
 from segmental_calc import calculate_segmental_angles
-from useful_imports import import_kinematics
+from useful_imports import import_kinematics, get_prelim_exclude_trials
 from calculate_hip_to_toe import calculate_hip_to_toe_x
 import IPython
 
@@ -46,18 +46,23 @@ def get_paths(h5_dirs):
         if not os.path.exists(dir):
             print(f'directory does not exist: {dir}')
 
-    all_phase_paths = []
+    all_phase_paths_unfiltered = []
     for dir in phase_dirs:
         phase_paths = glob.glob(os.path.join(dir, '*'))
-        all_phase_paths += phase_paths
+        all_phase_paths_unfiltered += phase_paths
 
-    all_h5_paths = []
+    all_h5_paths_unfiltered = []
     for dir in h5_dirs:
         h5_paths = glob.glob(os.path.join(dir, '*'))
-        all_h5_paths += h5_paths
+        all_h5_paths_unfiltered += h5_paths
 
-    all_h5_paths.sort()
-    all_phase_paths.sort()
+    all_h5_paths_unfiltered.sort()
+    all_phase_paths_unfiltered.sort()
+
+    excluded_h5_paths = get_prelim_exclude_trials()
+    excluded_phase_paths = [h5_path.replace('.h5', '.phase').replace('h5_knee_fixed', 'phase') for h5_path in excluded_h5_paths]
+    all_h5_paths = [path for path in all_h5_paths_unfiltered if path not in excluded_h5_paths]
+    all_phase_paths = [path for path in all_phase_paths_unfiltered if path not in excluded_phase_paths]
 
     return all_phase_paths, all_h5_paths
 
@@ -170,6 +175,7 @@ def get_step_data(h5_path, phase_path, trial_data):
 def step_table_initialize(h5_dirs):
 
     phase_paths, h5_paths = get_paths(h5_dirs)
+
     belt_speed = 15 #cm/s
     joint_angles = ["Hip_angle", "Knee_angle", "Ankle_angle", "MTP_angle"]
     segment_dict = {"Crest": ["IliacCrest", "Hip"],
@@ -188,6 +194,7 @@ def step_table_initialize(h5_dirs):
 
     step_dfs_by_trial = []
     trial_table = pd.DataFrame()
+    
     for h5_path, phase_path in zip(h5_paths, phase_paths): # for each trial
         trialname_h5 = os.path.splitext(os.path.split(h5_path)[1])[0]
         trailname_phase = os.path.splitext(os.path.split(phase_path)[1])[0]
@@ -213,13 +220,12 @@ def step_table_initialize(h5_dirs):
 
     return step_table
 
-def main(main_dir):
+def main(main_dir, groups):
     print('running step_table_initialize.py')
     #input
-    groups = ['V3Off_Levelwalk', 'WT_Levelwalk']
 
     h5_dirs = [os.path.join(main_dir, group, 'h5_knee_fixed') for group in groups]
-
+    
     #run code
     step_table = step_table_initialize(h5_dirs)
 
@@ -231,4 +237,5 @@ def main(main_dir):
 
 
 if __name__ == "__main__":
-    main("Full_data")
+    groups = ['WT_Levelwalk', 'V3Off_Levelwalk', 'WT_Incline', 'V3Off_Incline']
+    main("Full_data", groups)
