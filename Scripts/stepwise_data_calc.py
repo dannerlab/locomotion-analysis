@@ -46,7 +46,9 @@ def add_position_stats(step_table, slicing_dict):
                 except ValueError:
                     print(ValueError)
                     print(f'h5 path: {h5_path}')
-                    jfsedawldckf
+                    print('confirm phase files for this step index, make sure swing time is prior to stance time')
+                    print('terminating from stepwise_data_calc.py')
+                    exit()
 
 
 
@@ -85,7 +87,7 @@ def calc_discrete_stats(step_table, slicing_dict):
 def calc_joint_angle_stats(step_table, joint_angles, slicing_dict):
 
     error_steps = []
-
+    printed_h5_path = None
     for step_i, step in step_table.iterrows():
         h5_path = step['source-data-h5-path']
         h5_df = import_kinematics(h5_path)
@@ -94,7 +96,7 @@ def calc_joint_angle_stats(step_table, joint_angles, slicing_dict):
             start = step[slicing_dict[phase][0]]
             stop = step[slicing_dict[phase][1]]
             step_slice = h5_df[start:stop]
-
+            
             for joint in joint_angles:
                 try:
                     step_table.at[step_i, f'{phase}-{joint}-min'] = min(step_slice[joint])
@@ -103,6 +105,11 @@ def calc_joint_angle_stats(step_table, joint_angles, slicing_dict):
                 except ValueError:
                     if step_i not in error_steps:
                         error_steps.append(step_i)
+                    print(f'ValueError: {h5_path} {phase} {joint} start:{start} stop:{stop}')
+                except KeyError:
+                    if h5_path != printed_h5_path:
+                        printed_h5_path = h5_path
+                        print(f'KeyError: {joint} not found in {h5_path}, from stepwise_data_calc.py')
 
     if error_steps != []:
         print(error_steps)
