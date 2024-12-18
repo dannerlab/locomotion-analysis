@@ -205,5 +205,11 @@ def exclude_trials(step_table_df):
         if trial in excluded_trials:
             step_table_df = step_table_df.drop(data.index)
             dropped_trials.append(trial)
-    print(f"dropped trials: {dropped_trials}")
+    # print(f"dropped trials: {dropped_trials}")
     return step_table_df, dropped_trials
+
+def get_prelim_exclude_trials():
+    trials = [# "Full_data\\WT_Incline\\h5_knee_fixed\\gp11m1_left_1.h5",
+              # "Full_data\\WT_Incline\\h5_knee_fixed\\gp11m1_right_2.h5", #missing MTP angle
+              ]
+    return trials
