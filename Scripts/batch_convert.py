@@ -27,7 +27,7 @@ def batch_convert(groups, data_folder):
     print(f'processed files: {processed_files}')
 
 def main():
-    groups = ["V3Off_Levelwalk", "WT_Levelwalk"]
+    groups = ["V3Off_Incline"] #["WT_Levelwalk", "V3Off_Levelwalk", "V3Off_Incline"]
     data_folder = "Full_data" #"Sample_data"
     batch_convert(groups, data_folder)
 

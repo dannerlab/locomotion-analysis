@@ -16,14 +16,27 @@ from group_comparison import main as group_comparison_main
 from stick_plots import main as stick_plots_main
 from avg_group_compare_graphs import main as avg_group_compare_graphs_main
 from all_joint_angle_toe_touch import main as all_joint_angle_toe_touch
+from useful_imports import exclude_trials, get_prelim_exclude_trials
+from all_joint_angle_toe_off import main as all_joint_angle_toe_off
+from mouse_joint_angles_toe_touch import main as mouse_joint_angles_toe_touch
+from mouse_joint_angles_toe_off import main as mouse_joint_angles_toe_off
+import pandas as pd
 
 main_dir = 'Full_data'
+groups = ['WT_Levelwalk', 'V3Off_Levelwalk', 'WT_Incline', 'V3Off_Incline']
+prelim_excluded = get_prelim_exclude_trials()
+if prelim_excluded != []:
+    print(f'excluding trials: {prelim_excluded}')
 
 print()
-step_table_initialize_main(main_dir)
+step_table_initialize_main(main_dir, groups)
     #prints h5 save directories, then saves step_table.csv to main_dir
     #also runs segmental_calc which adds segmental stats to the h5 files directly
 print()
+
+step_table_df = pd.read_csv(f"{main_dir}/step_table.csv")
+step_table_df, excluded_trials = exclude_trials(step_table_df)
+print(f'excluded trials: {excluded_trials}')
 
 animal_avgs_main(main_dir)
     #saves animal_avg_&_stdv.csv to main_dir
@@ -43,6 +56,18 @@ print()
 
 all_joint_angle_toe_touch(main_dir)
     #saves graphs to main_dir/angle_graphs/toe_touch_aligned
+print()
+
+all_joint_angle_toe_off(main_dir)
+    #saves graphs to main_dir/angle_graphs/toe_off_aligned
+print()
+
+mouse_joint_angles_toe_touch(main_dir)
+    #saves graphs to main_dir/angle_graphs/toe_touch_aligned/group_dir
+print()
+
+mouse_joint_angles_toe_off(main_dir)
+    #saves graphs to main_dir/angle_graphs/toe_off_aligned/group_dir
 print()
 
 stop_time = time.time()
