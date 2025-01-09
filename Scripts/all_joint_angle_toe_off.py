@@ -129,7 +129,7 @@ def get_steps_array(group, joint_or_seg):
     # make nice tables: length is number of steps, width is max length of any step
     max_stance = max(max_stance_lengths)
     max_swing = max(max_swing_lengths) #max for whole group (of each mouse's max)
-    max_length = max_swing + max_stance - 1 # remove 1 or else toe off is double counted
+    max_length = max_stance + max_swing - 1 # remove 1 or else toe off is double counted
     max_toe_off_idx = max_stance
 
     mouse_avg_steps = [] #list of avg lists for each trial
@@ -163,12 +163,16 @@ def get_steps_array(group, joint_or_seg):
                 # print(f'swing_zeros length: {max_swing - step_swing_length}')
                 # print(f'group: {group}, mouse: {id}, trial: {trial_i}, step: {step_i}') #glitch with last step of the trial (as anticipated)
                 swing_zeros = np.nan*(np.ones(max_swing - step_swing_length - 1))
-                zeroed_joint_angle = list(stance_zeros) + list(step[f'{joint_or_seg}']) + list(swing_zeros) #confirmed
+                try:
+                    zeroed_joint_angle = list(stance_zeros) + list(step[f'{joint_or_seg}']) + list(swing_zeros) #confirmed
+                    trial_steps_array[step_i] = zeroed_joint_angle #add this step to the array of all steps for this trial
+                except KeyError:
+                    print(f'key error: {id}{joint_or_seg}')
+                    trial_steps_array = trial_steps_array[:-1]
+                    #does not create a row to maintain length of array, so indexing is thrown off
+                    #instead, remove the last row of the array
                 #print(f'zeroed_joint_angle: {zeroed_joint_angle}')
-                trial_steps_array[step_i] = zeroed_joint_angle #add this step to the array of all steps for this trial
                 # print(trial_steps_array[step_i])
-                if np.all(np.isnan(trial_steps_array[step_i])):
-                    print(f'nan step: {step_i}')
             mouse_trials_list.append(trial_steps_array) #add this array to the list of all arrays for all trials in the group
             for array in mouse_trials_list:
                 for line in array:
@@ -214,12 +218,18 @@ def graph_one_group(mouse_avg_steps, group_avg_step, group_name, max_toe_off_idx
     colors = [cmap(i/num_colors) for i in range(num_colors)]
 
     #colors for groupwise for comparison
-    if group_name == 'WT_Incline' or group_name == 'WT_Levelwalk':
+    #honestly this should be a dictionary for the whole repo
+    if group_name == 'WT_Levelwalk':
         group_color = 'blue'
-    elif group_name == 'V3Off_Incline' or group_name == 'V3Off_Levelwalk':
+    elif group_name == 'WT_Incline':
+        group_color = 'green'
+    elif group_name == 'V3Off_Levelwalk':
         group_color = 'red'
-    else:
+    elif group_name == 'V3Off_Incline':
         group_color = 'orange'
+    else:
+        group_color = 'black'
+        print('group color not defined')
         
     #x axis values
     #x calculations
@@ -269,12 +279,17 @@ def graph_many_groups(steps_arrays_dicts_list, joint_or_seg, save_directory):
         group_avg_step = group_dict['group_avg_step']
         group = group_dict['group']
         if len(steps_arrays_dicts_list) == 2:
-            if group[0] == 'WT':
+            if group_name == 'WT_Levelwalk':
                 group_color = 'blue'
-            elif group[0] == 'V3Off':
+            elif group_name == 'WT_Incline':
+                group_color = 'green'
+            elif group_name == 'V3Off_Levelwalk':
                 group_color = 'red'
-            else:
+            elif group_name == 'V3Off_Incline':
                 group_color = 'orange'
+            else:
+                group_color = 'black'
+                print('group color not defined')
 
         #colors for multicolor
         else:
@@ -313,7 +328,7 @@ def graph_many_groups(steps_arrays_dicts_list, joint_or_seg, save_directory):
     plt.savefig(f'{save_name}.png')
     #plt.show()
 
-def main(main_dir):
+def main(main_dir, selected_groups):
     #set up statistics names & rc params
     joints_and_segments = get_joints_and_segments()
     joint_seg_names = [None] * len(joints_and_segments)
@@ -326,7 +341,7 @@ def main(main_dir):
     step_table_unfiltered = pd.read_csv(f'{main_dir}/step_table.csv')
     step_table, excluded_trials = exclude_trials(step_table_unfiltered)
     step_table_grouped_all_groups = step_table.groupby(['mouse-type', 'exp-type'])
-    selected_groups = [('WT', 'Levelwalk'), ('V3Off', 'Levelwalk')]
+    
     if selected_groups != step_table_grouped_all_groups.groups.keys():
         step_table_selected = [step_table_grouped_all_groups.get_group(group) for group in selected_groups]
         step_table_grouped = pd.concat(step_table_selected).groupby(['mouse-type', 'exp-type'])
@@ -363,4 +378,5 @@ def main(main_dir):
 
 
 if __name__ == "__main__":
-    main('Full_data')
+    selected_groups = [('WT', 'Incline'), ('V3Off', 'Incline')]############edit to change groups, can only be 2
+    main('Full_data', selected_groups)
