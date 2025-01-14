@@ -123,14 +123,25 @@ def calc_anova(step_table_grouped, selected_stats, alpha):
     return one_way_p
 
 
-def compare_animal_means(animal_stats_fp, alpha):
+def compare_animal_means(animal_stats_fp, alpha, compare_groups):
     '''Runs stats on avgs of each animal (Han style)'''
-    animal_stats = pd.read_csv(animal_stats_fp)
+    animal_stats_unfiltered = pd.read_csv(animal_stats_fp)
+
+    animal_stats_list = []
+    for group in compare_groups:
+        group_split = group.split('_')
+        animal_stats_group =  animal_stats_unfiltered[
+            (animal_stats_unfiltered['mouse-type'] == group_split[0]) &
+            (animal_stats_unfiltered['exp-type'] == group_split[1])]
+        animal_stats_list.append(animal_stats_group)
+    
+    animal_stats = pd.concat(animal_stats_list)
+    
     animal_stats_grouped = animal_stats.groupby(['mouse-type', 'exp-type'])
-    stats = animal_stats.filter(like='avg-').columns
+    stats = animal_stats_unfiltered.filter(like='avg-').columns
     #since col names for avgs all begin with avg, cannot use get_numeric_col_names()
     #that is ok because get_numeric_col_names() is used to generate this table so re-running will update here also
-
+    
     standardized_animal_grouped = standardize_residuals(animal_stats_grouped, stats)
     normal, non_normal = shapiro_and_k(standardized_animal_grouped, alpha)
     one_way_p_animal = calc_anova(animal_stats_grouped, stats, alpha)
@@ -177,13 +188,13 @@ def save(fp, normal, non_normal, anova, name):
     print(f'saved to: {save_location}')
 
 
-def main(main_dir):
+def main(main_dir, compare_groups):
     print('running group_comparison.py')
     alpha = 0.05
 
     #by animal
     animal_stats_fp = f'{main_dir}/animal_avg_&_stdv.csv' #already filtered by whatever was used in animal_avgs.py
-    normal_animal, non_normal_animal, anova_animal = compare_animal_means(animal_stats_fp, alpha)
+    normal_animal, non_normal_animal, anova_animal = compare_animal_means(animal_stats_fp, alpha, compare_groups)
     save(animal_stats_fp, normal_animal, non_normal_animal, anova_animal, "animal")
 
     # by step cycle: should do in jupyter notebook or R
@@ -194,4 +205,4 @@ def main(main_dir):
     return
 
 if __name__ == "__main__":
-    main(main_dir="Full_data")
+    main(main_dir="Full_data", compare_groups=['WT_Incline', 'V3Off_Incline'])

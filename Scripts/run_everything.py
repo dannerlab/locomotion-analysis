@@ -38,20 +38,9 @@ step_table_df = pd.read_csv(f"{main_dir}/step_table.csv")
 step_table_df, excluded_trials = exclude_trials(step_table_df)
 print(f'excluded trials: {excluded_trials}')
 
-animal_avgs_main(main_dir)
-    #saves animal_avg_&_stdv.csv to main_dir
-print()
-
-group_comparison_main(main_dir)
-    #prints 'saved to: maindir\group_results' twice, saves ANOVA_results.csv, non_normal_stats.csv, normal_stats.csv & animal versions to group_results
-print()
-
+#basic viewing of data graphs
 stick_plots_main(main_dir)
     #saves stick_plots to main_dir/stick_diagrams; prints names of each trial
-print()
-
-avg_group_compare_graphs_main(main_dir)
-    #saves graphs to main_dir/group_results/avg_graphs
 print()
 
 all_joint_angle_toe_touch(main_dir)
@@ -68,6 +57,20 @@ print()
 
 mouse_joint_angles_toe_off(main_dir)
     #saves graphs to main_dir/angle_graphs/toe_off_aligned/group_dir
+print()
+
+#stats & visualization
+animal_avgs_main(main_dir)
+    #saves animal_avg_&_stdv.csv to main_dir
+print()
+
+compare_groups = ['WT_Incline', 'V3Off_Incline']
+group_comparison_main(main_dir, compare_groups)
+    #prints 'saved to: maindir\group_results' twice, saves ANOVA_results.csv, non_normal_stats.csv, normal_stats.csv & animal versions to group_results
+print()
+
+avg_group_compare_graphs_main(main_dir, compare_groups)
+    #saves graphs to main_dir/group_results/avg_graphs
 print()
 
 stop_time = time.time()
