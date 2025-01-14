@@ -129,10 +129,9 @@ def compare_animal_means(animal_stats_fp, alpha, compare_groups):
 
     animal_stats_list = []
     for group in compare_groups:
-        group_split = group.split('_')
         animal_stats_group =  animal_stats_unfiltered[
-            (animal_stats_unfiltered['mouse-type'] == group_split[0]) &
-            (animal_stats_unfiltered['exp-type'] == group_split[1])]
+            (animal_stats_unfiltered['mouse-type'] == group[0]) &
+            (animal_stats_unfiltered['exp-type'] == group[1])]
         animal_stats_list.append(animal_stats_group)
     
     animal_stats = pd.concat(animal_stats_list)

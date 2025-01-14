@@ -278,6 +278,7 @@ def graph_many_groups(steps_arrays_dicts_list, joint_or_seg, save_directory):
         #colors for groups if it is WT vs V3Off
         group_avg_step = group_dict['group_avg_step']
         group = group_dict['group']
+        group_name = '_'.join(group)
         if len(steps_arrays_dicts_list) == 2:
             if group_name == 'WT_Levelwalk':
                 group_color = 'blue'
@@ -345,7 +346,6 @@ def main(main_dir, selected_groups):
     if selected_groups != step_table_grouped_all_groups.groups.keys():
         step_table_selected = [step_table_grouped_all_groups.get_group(group) for group in selected_groups]
         step_table_grouped = pd.concat(step_table_selected).groupby(['mouse-type', 'exp-type'])
-        print(f'selected groups: {step_table_grouped.groups.keys()}')
     save_directory = f'{main_dir}/angle_graphs/toe_off_aligned'
     if not os.path.exists(save_directory):
         os.makedirs(save_directory, exist_ok = True)
