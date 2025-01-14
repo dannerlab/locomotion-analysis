@@ -293,7 +293,7 @@ def graph_many_groups(steps_arrays_dicts_list, joint_or_seg, save_directory):
     plt.savefig(f'{save_name}.png')
     #plt.show()
 
-def main(main_dir):
+def main(main_dir, selected_groups):
     #set up statistics names & rc params
     joints_and_segments = get_joints_and_segments()
     joint_seg_names = [None] * len(joints_and_segments)
@@ -306,7 +306,7 @@ def main(main_dir):
     step_table_unfiltered = pd.read_csv(f'{main_dir}/step_table.csv')
     step_table, excluded_trials = exclude_trials(step_table_unfiltered)
     step_table_grouped_all_groups = step_table.groupby(['mouse-type', 'exp-type'])
-    selected_groups = [('WT', 'Levelwalk'), ('V3Off', 'Levelwalk')]
+    
     if selected_groups != step_table_grouped_all_groups.groups.keys():
         step_table_selected = [step_table_grouped_all_groups.get_group(group) for group in selected_groups]
         step_table_grouped = pd.concat(step_table_selected).groupby(['mouse-type', 'exp-type'])
@@ -345,4 +345,5 @@ def main(main_dir):
         print(f'saved to: {save_dir}')
 
 if __name__ == "__main__":
-    main('Full_data')
+    selected_groups = [('WT', 'Levelwalk'), ('V3Off', 'Levelwalk')]
+    main('Full_data', selected_groups)
