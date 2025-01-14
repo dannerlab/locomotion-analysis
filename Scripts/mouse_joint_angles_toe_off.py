@@ -71,8 +71,8 @@ def get_stepwise_stats(mouse_id, mouse_data, stat):
             #print(f'step_i: {step_i}, trial_i: {trial_i}, abs_step_i: {abs_step_i}')
             step['toe-off-adjusted-idx'] = step['abs-idx'] - step['abs-toe-off-idx']
 
-            swing_pad = np.nan*(np.ones(max_swing_len - swing_lens[trial_i][step_i]))
             stance_pad = np.nan*(np.ones(max_stance_len - stance_lens[trial_i][step_i]))
+            swing_pad = np.nan*(np.ones(max_swing_len - swing_lens[trial_i][step_i]))
             padded_step = list(swing_pad) + list(step[stat]) + list(stance_pad)
 
             if len(padded_step) != steps_arr.shape[1]:
