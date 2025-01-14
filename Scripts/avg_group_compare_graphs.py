@@ -63,7 +63,9 @@ def set_ylabel(stat):
                         'step-Hip_to_Toe_x-max': 'Hip to Toe x Max (mm)',
                         'step-Hip_to_Toe_x-min': 'Hip to Toe x Min (mm)',
                         'step-Hip_to_Toe_x-excursion': 'Hip to Toe x Excursion (mm)',
-                        'step-Hip_angle-excursion': 'Hip Angle Excursion (degrees)',}
+                        'step-Hip_angle-excursion': 'Hip Angle Excursion (degrees)',
+                        'stance-Hip_angle-excursion': 'Stance Hip Angle Excursion (degrees)',
+                        'swing-Hip_angle-excursion': 'Swing Hip Angle Excursion (degrees)',}
     try:
         return stat_labels[stat]
     except KeyError:  
@@ -132,7 +134,7 @@ def main(main_dir, compare_groups):
             'step-IliacCrest_y-excursion',
             'duty-factor',
             'step-Hip_to_Toe_x-max', 'step-Hip_to_Toe_x-min', 'step-Hip_to_Toe_x-excursion',
-            'step-Hip_angle-excursion'] 
+            'step-Hip_angle-excursion', 'stance-Hip_angle-excursion', 'swing-Hip_angle-excursion',] 
             #add more stats, should match column labels for animal_avg_and_stdv.csv without the 'avg'/ 'stdv' prefix
             #advised to augment the y limits dictionary at top of script when you add more stats
             #should also augment y labels dictionary when you add a stat
@@ -145,7 +147,7 @@ def main(main_dir, compare_groups):
     return
 
 if __name__ == "__main__":
-    main('Full_data', ['WT_Levelwalk', 'V3Off_Levelwalk'])
+    main('Full_data', ['WT_Incline', 'V3Off_Incline'])
 
 
 
