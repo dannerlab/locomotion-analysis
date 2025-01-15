@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import IPython
 import numpy as np
-from useful_imports import import_kinematics, get_joints_and_segments, get_sampling_freq, get_rc_params, exclude_trials
+from useful_imports import import_kinematics, get_joints_and_segments, get_sampling_freq, get_rc_params, exclude_trials, get_color
 def get_steps(stepcycle_df, h5_df):
     steps = []
     for idx in range(len(stepcycle_df)):
@@ -199,12 +199,7 @@ def graph_one_group(mouse_avg_steps, group_avg_step, group_name, max_toe_touch_i
     colors = [cmap(i/num_colors) for i in range(num_colors)]
 
     #colors for groupwise for comparison
-    if group_name == 'WT_Incline' or group_name == 'WT_Levelwalk':
-        group_color = 'blue'
-    elif group_name == 'V3Off_Incline' or group_name == 'V3Off_Levelwalk':
-        group_color = 'red'
-    else:
-        group_color = 'orange'
+    group_color = get_color(group_name)
         
     #x axis values
     #x calculations
@@ -257,20 +252,8 @@ def graph_many_groups(steps_arrays_dicts_list, joint_or_seg, save_directory):
         #colors for groups if it is WT vs V3Off
         group_avg_step = group_dict['group_avg_step']
         group = group_dict['group']
-        if len(steps_arrays_dicts_list) == 2:
-            if group[0] == 'WT':
-                group_color = 'blue'
-            elif group[0] == 'V3Off':
-                group_color = 'red'
-            else:
-                group_color = 'orange'
-
-        #colors for multicolor
-        else:
-            num_colors = len(steps_arrays_dicts_list)
-            cmap = plt.get_cmap('turbo')
-            colors = [cmap(i/num_colors) for i in range(num_colors)]
-            group_color = colors[group_i]
+        group_name = '_'.join(group)
+        group_color = get_color(group_name)
 
         #name & plot
         group_name = group_dict['group_name']

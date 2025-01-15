@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import IPython
 import numpy as np
-from useful_imports import import_kinematics, get_joints_and_segments, get_sampling_freq, get_rc_params, exclude_trials
+from useful_imports import import_kinematics, get_joints_and_segments, get_sampling_freq, get_rc_params, exclude_trials, get_color
 
 def get_steps(stepcycle_df, h5_df):
     steps = []
@@ -224,18 +224,7 @@ def graph_one_group(mouse_avg_steps, group_avg_step, group_name, max_toe_off_idx
     colors = [cmap(i/num_colors) for i in range(num_colors)]
 
     #colors for groupwise for comparison
-    #honestly this should be a dictionary for the whole repo
-    if group_name == 'WT_Levelwalk':
-        group_color = 'blue'
-    elif group_name == 'WT_Incline':
-        group_color = 'green'
-    elif group_name == 'V3Off_Levelwalk':
-        group_color = 'red'
-    elif group_name == 'V3Off_Incline':
-        group_color = 'orange'
-    else:
-        group_color = 'black'
-        print('group color not defined')
+    group_color = get_color(group_name)
         
     #x axis values
     #x calculations
@@ -269,7 +258,7 @@ def graph_one_group(mouse_avg_steps, group_avg_step, group_name, max_toe_off_idx
     # plt.show()
     return save_directory
 
-def graph_many_groups(steps_arrays_dicts_list, joint_or_seg, save_directory):
+def graph_two_groups(steps_arrays_dicts_list, joint_or_seg, save_directory):
     plt.clf()
 
     #color, plot, & label each group
@@ -281,29 +270,11 @@ def graph_many_groups(steps_arrays_dicts_list, joint_or_seg, save_directory):
         max_toe_off_time = max_toe_off_idx/sampling_freq
         time_vec = np.linspace(0.0, (max_length - 1)/sampling_freq, max_length) - max_toe_off_time
 
-        #colors for groups if it is WT vs V3Off
+        #colors for groups
         group_avg_step = group_dict['group_avg_step']
         group = group_dict['group']
         group_name = '_'.join(group)
-        if len(steps_arrays_dicts_list) == 2:
-            if group_name == 'WT_Levelwalk':
-                group_color = 'blue'
-            elif group_name == 'WT_Incline':
-                group_color = 'green'
-            elif group_name == 'V3Off_Levelwalk':
-                group_color = 'red'
-            elif group_name == 'V3Off_Incline':
-                group_color = 'orange'
-            else:
-                group_color = 'black'
-                print('group color not defined')
-
-        #colors for multicolor
-        else:
-            num_colors = len(steps_arrays_dicts_list)
-            cmap = plt.get_cmap('turbo')
-            colors = [cmap(i/num_colors) for i in range(num_colors)]
-            group_color = colors[group_i]
+        group_color = get_color(group_name)
 
         #name & plot
         group_name = group_dict['group_name']
@@ -360,7 +331,7 @@ def main(main_dir, selected_groups):
     save_dirs = []
     for joint_or_seg in joint_seg_names:
         steps_arrays_dicts_list = []
-        for group, group_data in step_table_grouped:
+        for group, group_data in step_table_grouped: #should run twise, each group on own axes
             group_name = '_'.join(group) #should be something like WT_Levelwalk
             mouse_avg_steps, group_avg_step, max_toe_off_idx, max_length, group_stdv = get_steps_array(group_data, joint_or_seg)
             save_dir = graph_one_group(mouse_avg_steps, group_avg_step, group_name, max_toe_off_idx, joint_or_seg, save_directory, max_length, group_data, group_stdv)
@@ -377,7 +348,7 @@ def main(main_dir, selected_groups):
                                 }
             steps_arrays_dicts_list.append(steps_arrays_dict)
         
-        graph_many_groups(steps_arrays_dicts_list, joint_or_seg, save_directory)
+        graph_two_groups(steps_arrays_dicts_list, joint_or_seg, save_directory) #graph both groups on same axes
     
     for save_dir in save_dirs:
         print(f'saved to: {save_dir}')

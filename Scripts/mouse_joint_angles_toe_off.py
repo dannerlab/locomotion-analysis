@@ -8,9 +8,10 @@ import os
 from useful_imports import *
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 import IPython
 import numpy as np
-from all_joint_angle_toe_off import get_steps, get_stances, get_swings
+from all_joint_angle_toe_off import get_steps, get_stances, get_swings, get_color
 
 rc_params = get_rc_params()
 plt.rcParams.update(rc_params)
@@ -105,9 +106,11 @@ def graph_stats(mouse_id, mouse_data, steps_arr, avg_line, stdv_line, stat, max_
     #get colors for trial
     trial_grouped = mouse_data.groupby(['mouse-type', 'exp-type', 'mouse-id', 'trial-number'])
     if trial_colors:
-        colors = plt.cm.viridis(np.linspace(0, 1, len(trial_grouped))) #ncolors = ntrials
+        colors = sns.color_palette("husl", len(trial_grouped)) #ncolors = ntrials
+        alpha = 0.5
     else:
         colors = ['black']*len(trial_grouped) #if not coloring by trial, all lines are black
+        alpha = 0.25
 
     #get x-axis for trial
     sampling_freq = get_sampling_freq()
@@ -122,16 +125,21 @@ def graph_stats(mouse_id, mouse_data, steps_arr, avg_line, stdv_line, stat, max_
             label = f'trial_{trial_id[3]}'
             if label not in labels:
                 labels.append(label)
-                plt.plot(time_vec, steps_arr[abs_step_i], color= colors[trial_i], alpha=0.5, label = label)
+                plt.plot(time_vec, steps_arr[abs_step_i], color= colors[trial_i], alpha=alpha, label = label)
             else:
-                plt.plot(time_vec, steps_arr[abs_step_i], color= colors[trial_i], alpha=0.5)
+                plt.plot(time_vec, steps_arr[abs_step_i], color= colors[trial_i], alpha=alpha)
             abs_step_i += 1
     
     #plot toe off & avg step
-    plt.plot(time_vec, avg_line, color='black', linewidth=2, label='average')
     upper = avg_line + stdv_line
     lower = avg_line - stdv_line
-    plt.fill_between(time_vec, lower, upper, color = 'black', alpha = 0.2)
+    group_name = '_'.join(mouse_id[0:2])
+    if trial_colors:
+        plt.plot(time_vec, avg_line, color= "black", linewidth=2, label='average')
+        plt.fill_between(time_vec, lower, upper, color = "black", alpha = 0.2)
+    else:
+        plt.plot(time_vec, avg_line, color= get_color(group_name), linewidth=2, label='average') #if color error, see useful_imports also
+        plt.fill_between(time_vec, lower, upper, color = get_color(group_name), alpha = 0.2)
     plt.axvline(time_vec[max_toe_off], color = 'black', linestyle = '--')
     
     if trial_colors:
