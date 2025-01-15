@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import os
 import IPython
-from useful_imports import import_kinematics
+from useful_imports import import_kinematics, get_color
 
 rc_params = {
         "figure.constrained_layout.use": False,
@@ -82,20 +82,18 @@ def plot_diagram(trial, main_dir):
     ypos = ypos[:, start_index:stop_index:n_skips]
 
     # determine color
-    if trial['mouse-type'].iloc[0] == 'WT':
-        stance_color = 'blue'
-    elif trial['mouse-type'].iloc[0] == 'V3Off':
-        stance_color = 'red'
-    else:
-        stance_color = (0.00784313725490196, 0.6196078431372549, 0.45098039215686275)
+    group_name = (trial['mouse-type'] + "_" + trial['exp-type']).iloc[0]
+    swing_color = get_color(group_name)
+    if swing_color == "black": #this happens if group_name is not in dict
+        swing_color = "pink"
 
     #Plots lines
-    lines = axs.plot(xpos, ypos, linewidth=0.5, alpha=0.75, color = 'black')
+    lines = axs.plot(xpos, ypos, linewidth=0.5, alpha=0.75, color = swing_color)
 
     # Change colors for stance phase
     for start, end in zip(stance_start_indices, stance_stop_indices):
         for num in range(start, end):
-            lines[(num//n_skips) - ((start_index//n_skips) + 1)].set_color(stance_color)
+            lines[(num//n_skips) - ((start_index//n_skips) + 1)].set_color('black')
 
     #Plots joints
     axs.scatter(

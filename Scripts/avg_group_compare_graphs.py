@@ -6,7 +6,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 import IPython
-from useful_imports import get_rc_params
+from useful_imports import get_rc_params, color_dict
 
 rc_params = get_rc_params()
 plt.rcParams.update(rc_params)
@@ -100,10 +100,11 @@ def graph_stat(avg_table_path, stat, stat_type, compare_table_path, compare_grou
                 significance = '*'
             
 
-    palette = {'WT_Levelwalk': 'blue', 'V3Off_Levelwalk': 'red', 'WT_Incline': 'green', 'V3Off_Incline': 'orange'} #alter for more groups
+    palette = color_dict
     plt.figure(figsize=(10, 6))
     #actually plot
-    sns.boxplot(x = 'Group', y = 'Value', data = plot_df, hue = 'Group', palette = palette)
+    
+    sns.boxplot(x = 'Group', y = 'Value', data = plot_df, hue = 'Group', palette = palette) #if this throws an error, check if you have the color of the group specified in useful_imports
     sns.stripplot(x = 'Group', y = 'Value', data = plot_df, color = 'black', jitter = 0.2, size = 2.5)
     ylim_dict = set_ylim(stat)
     ymin_type = ylim_dict[f'ymin_{stat_type}']
