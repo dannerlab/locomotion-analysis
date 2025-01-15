@@ -160,9 +160,10 @@ def get_steps_array(group, joint_or_seg):
                     zeroed_joint_angle = list(swing_zeros) + list(step[f'{joint_or_seg}']) + list(stance_zeros)
                     trial_steps_array[step_i] = zeroed_joint_angle #add this step to the array of all steps for this trial
                 except KeyError:
-                    if mouse['mouse-id'] not in errors_printed:
-                        print(f'{joint_or_seg} not found in {mouse['mouse-id']}')
-                        errors_printed.append(mouse['mouse-id'])
+                    mouse_name = mouse['mouse-id'].iloc[0]
+                    if (mouse_name, joint_or_seg) not in errors_printed:
+                        print(f'{joint_or_seg} not found in {mouse_name}')
+                        errors_printed.append((mouse_name, joint_or_seg))
                     trial_steps_array = trial_steps_array[:-1]
             if len(trial_steps_array) > 0:
                 mouse_trials_list.append(trial_steps_array) #add this array to the list of all arrays for all trials in the group
@@ -352,5 +353,5 @@ def main(main_dir, selected_groups):
         print(f'saved to: {save_dir}')
 
 if __name__ == "__main__":
-    selected_groups = [('WT', 'Levelwalk'), ('V3Off', 'Levelwalk')]
+    selected_groups = [('WT', 'Incline'), ('V3Off', 'Incline')]
     main('Full_data', selected_groups)
