@@ -165,6 +165,7 @@ def main(main_dir):
     step_table_grouped = step_table.groupby(['mouse-type', 'exp-type', 'mouse-id'])
     save_folders = []
     for mouse_id, mouse_data in step_table_grouped:
+        printed_errors = []
         for stat in stats:
                 try:
                     mouse_steps_arr, mouse_avg_line, mouse_stdv, max_toe_off, max_length = get_stepwise_stats(mouse_id, mouse_data, stat)
@@ -172,7 +173,9 @@ def main(main_dir):
                     if save_folder not in save_folders:
                         save_folders.append(save_folder)
                 except KeyError:
-                    print(f'KeyError: {mouse_id} {stat}')
+                    if (mouse_id, stat) not in printed_errors:
+                        printed_errors.append((mouse_id, stat))
+                        print(f'KeyError: {mouse_id} {stat}')
     print(f'saved_to: {save_folders}')
     
     return

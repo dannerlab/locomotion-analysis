@@ -136,6 +136,8 @@ def get_steps_array(group, joint_or_seg):
     trial_counter = 0 #to allow iteration through all_steps_in_group by absolute trial index regardless of mouse grouping
     for id, mouse in mouse_wise_grouped: #for each mouse in the group
         mouse_trials_list = [] #list to be filled with all trial arrays for this mouse
+        key_errors_printed = []
+        nan_errors_printed = []
         for trial_i in mouse['trial-number'].unique(): #for each trial in the mouse
             trial_steps_array = np.nan * np.ones((nums_steps[trial_counter], max_length)) #array to be filled with all steps for this trial
             trial = all_steps_in_group[trial_counter] #need to use the h5 from all_steps_in_group with abs-idx col added; 1 step b/c toe off is already excluded
@@ -167,10 +169,11 @@ def get_steps_array(group, joint_or_seg):
                     zeroed_joint_angle = list(stance_zeros) + list(step[f'{joint_or_seg}']) + list(swing_zeros) #confirmed
                     trial_steps_array[step_i] = zeroed_joint_angle #add this step to the array of all steps for this trial
                 except KeyError:
-                    print(f'key error: {id}{joint_or_seg}')
-                    trial_steps_array = trial_steps_array[:-1]
-                    #does not create a row to maintain length of array, so indexing is thrown off
-                    #instead, remove the last row of the array
+                    if (id, joint_or_seg) not in key_errors_printed:
+                        key_errors_printed.append((id, joint_or_seg))
+                        print(f'key error: {id}, {joint_or_seg}')
+                    trial_steps_array = trial_steps_array[:-1] #remove last row of array to retain indexing
+
                 #print(f'zeroed_joint_angle: {zeroed_joint_angle}')
                 # print(trial_steps_array[step_i])
             mouse_trials_list.append(trial_steps_array) #add this array to the list of all arrays for all trials in the group
@@ -179,7 +182,10 @@ def get_steps_array(group, joint_or_seg):
                     if np.all(np.isnan((line))):
                         print('nan line')
                 if np.all(np.isnan(array)):
-                    print(f'nan array: {id}')
+                    if (id, joint_or_seg) not in nan_errors_printed:
+                        if (id, joint_or_seg) not in key_errors_printed:#make it print only if it is nan independent of key error
+                            print(f'nan array: {id}{joint_or_seg}')
+                            nan_errors_printed.append((id, joint_or_seg))
         #combine all trials into one array for the mouse that contains all steps (think concat; eliminate trial data)
         trial_n = len(mouse_trials_list)
         mouse_trials_arr = np.nan * np.ones((len(mouse) - (1 * trial_n), max_length))
@@ -278,6 +284,7 @@ def graph_many_groups(steps_arrays_dicts_list, joint_or_seg, save_directory):
         #colors for groups if it is WT vs V3Off
         group_avg_step = group_dict['group_avg_step']
         group = group_dict['group']
+        group_name = '_'.join(group)
         if len(steps_arrays_dicts_list) == 2:
             if group_name == 'WT_Levelwalk':
                 group_color = 'blue'
@@ -345,7 +352,6 @@ def main(main_dir, selected_groups):
     if selected_groups != step_table_grouped_all_groups.groups.keys():
         step_table_selected = [step_table_grouped_all_groups.get_group(group) for group in selected_groups]
         step_table_grouped = pd.concat(step_table_selected).groupby(['mouse-type', 'exp-type'])
-        print(f'selected groups: {step_table_grouped.groups.keys()}')
     save_directory = f'{main_dir}/angle_graphs/toe_off_aligned'
     if not os.path.exists(save_directory):
         os.makedirs(save_directory, exist_ok = True)

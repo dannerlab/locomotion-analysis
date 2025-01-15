@@ -135,6 +135,7 @@ def get_steps_array(group, joint_or_seg):
     mouse_avg_steps = [] #list of avg lists for each trial
     trial_counter = 0 #to allow iteration through all_steps_in_group by absolute trial index regardless of mouse grouping
     for id, mouse in mouse_wise_grouped: #for each mouse in the group
+        errors_printed = []
         mouse_trials_list = [] #list to be filled with all trial arrays for this mouse
         for trial_i in mouse['trial-number'].unique(): #for each trial in the mouse
             trial_steps_array = np.nan * np.ones((nums_steps[trial_counter], max_length)) #array to be fileld with all steps for this trial
@@ -155,9 +156,17 @@ def get_steps_array(group, joint_or_seg):
                 #np.empty(np.nan(max_length, 1))
                 swing_zeros = np.nan*(np.ones(max_swing - step_swing_length - 1))
                 stance_zeros = np.nan*(np.ones(max_stance - step_stance_length - 1))
-                zeroed_joint_angle = list(swing_zeros) + list(step[f'{joint_or_seg}']) + list(stance_zeros)
-                trial_steps_array[step_i] = zeroed_joint_angle #add this step to the array of all steps for this trial
-            mouse_trials_list.append(trial_steps_array) #add this array to the list of all arrays for all trials in the group
+                try:
+                    zeroed_joint_angle = list(swing_zeros) + list(step[f'{joint_or_seg}']) + list(stance_zeros)
+                    trial_steps_array[step_i] = zeroed_joint_angle #add this step to the array of all steps for this trial
+                except KeyError:
+                    mouse_name = mouse['mouse-id'].iloc[0]
+                    if (mouse_name, joint_or_seg) not in errors_printed:
+                        print(f'{joint_or_seg} not found in {mouse_name}')
+                        errors_printed.append((mouse_name, joint_or_seg))
+                    trial_steps_array = trial_steps_array[:-1]
+            if len(trial_steps_array) > 0:
+                mouse_trials_list.append(trial_steps_array) #add this array to the list of all arrays for all trials in the group
         
         #combine all trials into one array for the mouse that contains all steps (think concat; eliminate trial data)
         mouse_trials_arr = np.nan * np.ones((len(mouse), max_length))
@@ -293,7 +302,7 @@ def graph_many_groups(steps_arrays_dicts_list, joint_or_seg, save_directory):
     plt.savefig(f'{save_name}.png')
     #plt.show()
 
-def main(main_dir):
+def main(main_dir, selected_groups):
     #set up statistics names & rc params
     joints_and_segments = get_joints_and_segments()
     joint_seg_names = [None] * len(joints_and_segments)
@@ -306,11 +315,10 @@ def main(main_dir):
     step_table_unfiltered = pd.read_csv(f'{main_dir}/step_table.csv')
     step_table, excluded_trials = exclude_trials(step_table_unfiltered)
     step_table_grouped_all_groups = step_table.groupby(['mouse-type', 'exp-type'])
-    selected_groups = [('WT', 'Levelwalk'), ('V3Off', 'Levelwalk')]
+    
     if selected_groups != step_table_grouped_all_groups.groups.keys():
         step_table_selected = [step_table_grouped_all_groups.get_group(group) for group in selected_groups]
         step_table_grouped = pd.concat(step_table_selected).groupby(['mouse-type', 'exp-type'])
-        print(f'selected groups: {step_table_grouped.groups.keys()}')
     save_directory = f'{main_dir}/angle_graphs/toe_touch_aligned'
     if not os.path.exists(save_directory):
         os.makedirs(save_directory, exist_ok = True)
@@ -345,4 +353,5 @@ def main(main_dir):
         print(f'saved to: {save_dir}')
 
 if __name__ == "__main__":
-    main('Full_data')
+    selected_groups = [('WT', 'Incline'), ('V3Off', 'Incline')]
+    main('Full_data', selected_groups)
