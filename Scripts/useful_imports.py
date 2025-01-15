@@ -213,3 +213,16 @@ def get_prelim_exclude_trials():
               # "Full_data\\WT_Incline\\h5_knee_fixed\\gp11m1_right_2.h5", #missing MTP angle
               ]
     return trials
+
+color_dict = {'WT_Levelwalk': "blue",
+              'V3Off_Levelwalk': "red",
+              'WT_Incline': "green",
+              'V3Off_Incline': "orange",
+}
+
+def get_color(group):
+    if group not in color_dict:
+        print(f"Color not found for group: {group}")
+        return "black"
+    else:
+        return color_dict[group]
