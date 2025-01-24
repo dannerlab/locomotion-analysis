@@ -26,11 +26,12 @@ import pandas as pd
 #fill out these variables here
 main_dir = 'Full_data'
 groups = ['WT_Levelwalk', 'V3Off_Levelwalk', 'WT_Incline', 'V3Off_Incline']
+#to exclude specific trials, update useful imports
 ###########################################################################
 
-prelim_excluded = get_prelim_exclude_trials() #####this does not exclude them, just shows which are being excluded by default
-if prelim_excluded != []:
-    print(f'excluding trials: {prelim_excluded}')
+# prelim_excluded = get_prelim_exclude_trials() #####this does not exclude them, just shows which are being excluded by default
+# if prelim_excluded != []:
+#     print(f'excluding trials: {prelim_excluded}')
 
 print()
 step_table_initialize_main(main_dir, groups)
@@ -61,13 +62,13 @@ for pair in paired_groups:
     print(f'processing: {pair}')
 
     #calculate & graph boxplots for comparison between groups in the pair
-    # group_comparison_main(main_dir, pair)
-    #     #prints 'saved to: maindir\group_results' twice, saves ANOVA_results.csv, non_normal_stats.csv, normal_stats.csv & animal versions to group_results
-    # print()
+    group_comparison_main(main_dir, pair)
+        #prints 'saved to: maindir\group_results' twice, saves ANOVA_results.csv, non_normal_stats.csv, normal_stats.csv & animal versions to group_results
+    print()
 
-    # avg_group_compare_graphs_main(main_dir, pair)
-    #     #saves graphs to main_dir/group_results/avg_graphs
-    # print()
+    avg_group_compare_graphs_main(main_dir, pair)
+        #saves graphs to main_dir/group_results/avg_graphs
+    print()
 
     #graph each group and a summary comparison
     all_joint_angle_toe_touch(main_dir, pair)

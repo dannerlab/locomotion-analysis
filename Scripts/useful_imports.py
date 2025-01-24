@@ -197,15 +197,41 @@ def get_sampling_freq():
     return sampling_freq
 
 def exclude_trials(step_table_df):
-    '''excludes trials as defined in this function; returns tuple (step_table_df, dropped_trials)'''
-    excluded_trials = [('WT', 'Levelwalk', 'gp18m2', 1), ('WT', 'Levelwalk', 'gp17m1', 1),('WT', 'Levelwalk', 'gp17m1', 2),('WT', 'Levelwalk', 'gp17m1', 3)]
+    '''excludes trials as defined in this function; returns tuple (step_table_df, dropped_trials); step_table_df is filtered'''
+    #excluded in animal_avgs, thereby in group_comparison and avg_group_compare_graphs by default though not explicitly
+    excluded_trials = [('WT', 'Levelwalk', 'gp18m2', 1), 
+                       ('WT', 'Levelwalk', 'gp17m1', 1),
+                       ('WT', 'Levelwalk', 'gp17m1', 2),
+                       ('WT', 'Levelwalk', 'gp17m1', 3),
+                       #excluded trials for WT incline to match Han's processing
+                       ('WT', 'Incline', 'gp11m1', 1),
+                       ('WT', 'Incline', 'gp11m2', 2),
+                       ('WT', 'Incline', 'gp12m2', 2),
+                       ('WT', 'Incline', 'gp14m1', 2),
+                       ('WT', 'Incline', 'gp14m1', 3),
+                       ('WT', 'Incline', 'gp14m3', 2),
+                       ('WT', 'Incline', 'gp15m1', 1),
+                       ('WT', 'Incline', 'gp15m1', 2),
+                       ('WT', 'Incline', 'gp15m3', 1),
+                       ('WT', 'Incline', 'gp15m3', 2),
+                       ('WT', 'Incline', 'gp17m1', 2),
+                       ('WT', 'Incline', 'gp17m1', 3),
+                       ('WT', 'Incline', 'gp18m2', 1),
+                       ('WT', 'Incline', 'gp18m2', 2),
+                       #V3Off Incline to match Han's processing
+                       ('V3Off', 'Incline', 'gp13m2', 1),
+                       ('V3Off', 'Incline', 'gp14m5', 1),
+                       ('V3Off', 'Incline', 'gp14m5', 2),
+                       ('V3Off', 'Incline', 'gp15m2', 1),
+                       ('V3Off', 'Incline', 'gp15m2', 2),
+                       ]
     step_table_df_grouped = step_table_df.groupby(['mouse-type', 'exp-type', 'mouse-id', 'trial-number'])
     dropped_trials = []
     for trial, data in step_table_df_grouped:
         if trial in excluded_trials:
             step_table_df = step_table_df.drop(data.index)
             dropped_trials.append(trial)
-    # print(f"dropped trials: {dropped_trials}")
+
     return step_table_df, dropped_trials
 
 def get_prelim_exclude_trials():
