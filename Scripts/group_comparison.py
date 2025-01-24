@@ -171,7 +171,7 @@ def calc_wilcoxon(step_table_grouped, selected_stats, alpha):
 
 def compare_animal_means(animal_stats_fp, alpha, compare_groups):
     '''Runs stats on avgs of each animal (Han style)'''
-    animal_stats_unfiltered = pd.read_csv(animal_stats_fp)
+    animal_stats_unfiltered = pd.read_csv(animal_stats_fp) #already filtered via animal_avgs.py, subsequent filtering to select correct groups
 
     animal_stats_list = []
     for group in compare_groups: #create list containing 2 dfs, 1 for each group
