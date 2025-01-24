@@ -119,16 +119,62 @@ def calc_anova(step_table_grouped, selected_stats, alpha):
     #format for nicer saving
     one_way_p = pd.Series(one_way_p.values(),index=one_way_p.keys()).to_frame()
     one_way_p = one_way_p.rename(columns = {0: 'ANOVA_p_value'})
-
+    
     return one_way_p
 
+def calc_ttest(step_table_grouped, selected_stats, alpha): 
+    '''Runs t-test on all stats passed to it (only pass normal), returns df of p-values'''
+
+    t_test_p = {}
+
+    for key in selected_stats['stat']:#iterate through list of stats that we have chosen to run these tests on
+        group_stats = [] #list of selected columns (via key) for each group
+        for group_name, group in step_table_grouped:
+            group_stats.append(group[key])
+        
+        # #test for variance, comment out to match Han's but should optimally implement to run Welch's test instead of Ttest where appropriate
+        # levene_stat, levene_p = stats.levene(*(group_stats))
+        equal_var = True
+        # if levene_p <= alpha: #variances are significantly different
+        #     equal_var = False
+        
+        #run t-test
+        t_stat, p_val = stats.ttest_ind(group_stats[0], group_stats[1], equal_var=equal_var)
+        if p_val <= alpha: #filter for significance
+            t_test_p[key] = p_val
+        
+
+    #format for nicer saving
+    t_test_p = pd.Series(t_test_p.values(),index=t_test_p.keys()).to_frame()
+    t_test_p = t_test_p.rename(columns = {0: 't_test_p_value'})
+    
+    return t_test_p
+
+def calc_wilcoxon(step_table_grouped, selected_stats, alpha):
+    '''Runs wilcoxon on all stats passed to it (only pass non-normal), returns df of p-values'''
+
+    wilcoxon_p = {}
+
+    for key in selected_stats['stat']:
+        group_stats = [] #list of selected columns (via key) for each group
+        for group_name, group in step_table_grouped:
+            group_stats.append(group[key])
+        wilcoxon_stat, p_val = stats.wilcoxon((group_stats[0], group_stats[1]))
+        if p_val <= alpha: #filter for significance
+            wilcoxon_p[key] = p_val
+
+    #format for nicer saving
+    wilcoxon_p = pd.Series(wilcoxon_p.values(),index=wilcoxon_p.keys()).to_frame()
+    wilcoxon_p = wilcoxon_p.rename(columns = {0: 'wilcoxon_p_value'})
+    
+    return wilcoxon_p
 
 def compare_animal_means(animal_stats_fp, alpha, compare_groups):
     '''Runs stats on avgs of each animal (Han style)'''
     animal_stats_unfiltered = pd.read_csv(animal_stats_fp)
 
     animal_stats_list = []
-    for group in compare_groups:
+    for group in compare_groups: #create list containing 2 dfs, 1 for each group
         animal_stats_group =  animal_stats_unfiltered[
             (animal_stats_unfiltered['mouse-type'] == group[0]) &
             (animal_stats_unfiltered['exp-type'] == group[1])]
@@ -137,37 +183,21 @@ def compare_animal_means(animal_stats_fp, alpha, compare_groups):
     animal_stats = pd.concat(animal_stats_list)
     
     animal_stats_grouped = animal_stats.groupby(['mouse-type', 'exp-type'])
-    stats = animal_stats_unfiltered.filter(like='avg-').columns
+    list_of_stats = animal_stats_unfiltered.filter(like='avg-').columns
     #since col names for avgs all begin with avg, cannot use get_numeric_col_names()
     #that is ok because get_numeric_col_names() is used to generate this table so re-running will update here also
-    
-    standardized_animal_grouped = standardize_residuals(animal_stats_grouped, stats)
+
+    standardized_animal_grouped = standardize_residuals(animal_stats_grouped, list_of_stats)
     normal, non_normal = shapiro_and_k(standardized_animal_grouped, alpha)
-    one_way_p_animal = calc_anova(animal_stats_grouped, stats, alpha)
 
-    return normal, non_normal, one_way_p_animal
+    one_way_p_animal = calc_anova(animal_stats_grouped, list_of_stats, alpha)
+    ttest_vals = calc_ttest(animal_stats_grouped, normal, alpha)
+    wilcoxon_vals = calc_wilcoxon(animal_stats_grouped, non_normal, alpha)
 
-
-def compare_step_cycles(step_table_fp, alpha):
-    """ Compares 2+ groups based on step cycle level data """
-
-    step_table_unfiltered = pd.read_csv(step_table_fp)
-    step_table, excluded_trials = exclude_trials(step_table_unfiltered)
-    step_table_grouped = step_table.groupby(['mouse-type', 'exp-type'])
-    selected_stats = get_numeric_col_names() #gets names of the columns that it makes sense to run these tests on
-
-    standardized_residuals = standardize_residuals(step_table_grouped, selected_stats)
-
-    #calculate normalcy of residuals
-    normal_stats, non_normal_stats = shapiro_and_k(standardized_residuals, alpha)
-
-    #homogeneity of variance: one way p
-    one_way_p = calc_anova(step_table_grouped, selected_stats, alpha)
-
-    return normal_stats, non_normal_stats, one_way_p
+    return normal, non_normal, one_way_p_animal, ttest_vals, wilcoxon_vals
 
 
-def save(fp, normal, non_normal, anova, name):
+def save(fp, normal, non_normal, anova, ttest_vals, wilcoxon_vals, name, compare_groups):
     if name != "":
         name += "_"
 
@@ -175,14 +205,18 @@ def save(fp, normal, non_normal, anova, name):
     if not os.path.exists(save_location):
         os.makedirs(save_location)
 
-    normal_save_name = os.path.join(save_location, f'{name}normal_stats.csv')
-    non_normal_save_name = os.path.join(save_location, f'{name}non_normal_stats.csv')
-    anova_save_name = os.path.join(save_location, f'{name}ANOVA_results.csv')
-
+    groups_name = '_'.join([f'{group[0]}_{group[1]}' for group in compare_groups])
+    normal_save_name = os.path.join(save_location, f'{name}normal_stats_{groups_name}.csv')
+    non_normal_save_name = os.path.join(save_location, f'{name}non_normal_stats_{groups_name}.csv')
+    anova_save_name = os.path.join(save_location, f'{name}ANOVA_results_{groups_name}.csv')
+    ttest_save_name = os.path.join(save_location, f'{name}ttest_results_{groups_name}.csv')
+    wilcoxon_save_name = os.path.join(save_location, f'{name}wilcoxon_results_{groups_name}.csv')
 
     normal.to_csv(normal_save_name)
     non_normal.to_csv(non_normal_save_name)
     anova.to_csv(anova_save_name)
+    ttest_vals.to_csv(ttest_save_name)
+    wilcoxon_vals.to_csv(wilcoxon_save_name)
 
     print(f'saved to: {save_location}')
 
@@ -193,15 +227,10 @@ def main(main_dir, compare_groups):
 
     #by animal
     animal_stats_fp = f'{main_dir}/animal_avg_&_stdv.csv' #already filtered by whatever was used in animal_avgs.py
-    normal_animal, non_normal_animal, anova_animal = compare_animal_means(animal_stats_fp, alpha, compare_groups)
-    save(animal_stats_fp, normal_animal, non_normal_animal, anova_animal, "animal")
-
-    # by step cycle: should do in jupyter notebook or R
-    # step_table_fp = f'{main_dir}/step_table.csv'
-    # normal_stats, non_normal_stats, one_way_p = compare_step_cycles(step_table_fp, alpha)
-    # save(step_table_fp, normal_stats, non_normal_stats, one_way_p, "")
+    normal_animal, non_normal_animal, anova_animal, ttest_vals, wilcoxon_vals = compare_animal_means(animal_stats_fp, alpha, compare_groups)
+    save(animal_stats_fp, normal_animal, non_normal_animal, anova_animal, ttest_vals, wilcoxon_vals, "animal", compare_groups)
 
     return
 
 if __name__ == "__main__":
-    main(main_dir="Full_data", compare_groups=['WT_Incline', 'V3Off_Incline'])
+    main(main_dir="Selected_data", compare_groups=[('WT', 'Incline'), ('V3Off', 'Incline')])
