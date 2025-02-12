@@ -6,7 +6,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 import IPython
-from useful_imports import get_rc_params, color_dict
+from useful_imports import get_rc_params, color_dict, exclude_trials
 
 rc_params = get_rc_params()
 plt.rcParams.update(rc_params)
@@ -75,36 +75,41 @@ def set_ylabel(stat):
 def graph_stat(avg_table_path, stat, stat_type, compare_table_path, compare_groups):
     #read in data
     avg_table = pd.read_csv(avg_table_path)
-    avg_table_grouped = avg_table.groupby(['mouse-type', 'exp-type'])
+    avg_table_filtered = avg_table[avg_table['mouse-type'].isin([group[0] for group in compare_groups]) & avg_table['exp-type'].isin([group[1] for group in compare_groups])] #filter the table for the groups you want to compare
+    avg_table_grouped = avg_table_filtered.groupby(['mouse-type', 'exp-type']) 
     p_values = pd.read_csv(compare_table_path, index_col = 0)
 
     #make nice table for plotting from
     plot_data = []
-    for group_name, group_df in avg_table_grouped:
+    for group_name, group_df in avg_table_grouped: #group_name is a tuple (mouse-type, exp-type)
         group_label = group_name[0] + '_' + group_name[1]
         for value in group_df[f'{stat_type}-{stat}']:
             plot_data.append({'Group': group_label, 'Value': value})
     plot_df = pd.DataFrame(plot_data)
-    plot_df['Group'] = pd.Categorical(plot_df['Group'], categories = compare_groups, ordered = True) #alter for more groups
+    order = [group[0] + '_' + group[1] for group in compare_groups] #to keep in order specified in run_everything.py
+    #plot_df['Group'] = pd.Categorical(plot_df['Group'], categories = compare_groups, ordered = True) #alter for more groups
 
     #determine significance
     significance = ''
     if stat_type == 'avg':
-        if stat in p_values.index:
-            p_val = p_values.loc[stat, 'ANOVA_p_value']
+        stat_name = f'{stat_type}-{stat}'
+        if stat_name in p_values.index:
+            p_val = p_values.loc[stat_name, 't_test_p_value']
             if p_val < 0.001:
                 significance = '***'
             elif p_val < 0.01:
                 significance = '**'
             elif p_val < 0.05:
                 significance = '*'
-            
+        # else:
+        #     print(f'p value > 0.05 for {stat_name}')
+
 
     palette = color_dict
     plt.figure(figsize=(10, 6))
     #actually plot
     
-    sns.boxplot(x = 'Group', y = 'Value', data = plot_df, hue = 'Group', palette = palette) #if this throws an error, check if you have the color of the group specified in useful_imports
+    sns.boxplot(x = 'Group', y = 'Value', data = plot_df, order= order, hue = 'Group', palette = palette) #if this throws an error, check if you have the color of the group specified in useful_imports
     sns.stripplot(x = 'Group', y = 'Value', data = plot_df, color = 'black', jitter = 0.2, size = 2.5)
     ylim_dict = set_ylim(stat)
     ymin_type = ylim_dict[f'ymin_{stat_type}']
@@ -115,7 +120,7 @@ def graph_stat(avg_table_path, stat, stat_type, compare_table_path, compare_grou
 
 
     #save plot
-    group_name = '_'.join(compare_groups)
+    group_name = '_'.join([f'{group[0]}_{group[1]}' for group in compare_groups])
     save_name = f'{stat}_boxplot_{stat_type}_{group_name}.png'
     save_path = os.path.join(os.path.dirname(avg_table_path), 'group_results', 'avg_graphs')
     if not os.path.exists(save_path):
@@ -127,7 +132,8 @@ def graph_stat(avg_table_path, stat, stat_type, compare_table_path, compare_grou
 def main(main_dir, compare_groups):
     print('running avg_group_compare_graphs.py')
     avg_table_path = f'{main_dir}/animal_avg_&_stdv.csv'
-    compare_table_path = f'{main_dir}/group_results/animal_ANOVA_results.csv'
+    groups_name = '_'.join([f'{group[0]}_{group[1]}' for group in compare_groups])
+    compare_table_path = f'{main_dir}/group_results/animal_ttest_results_{groups_name}.csv'
 
     stats = ['stance-duration', 'swing-duration', 'step-duration',
             'step-ToeTip_x-excursion', 'step-ToeTip_y-excursion',
@@ -148,7 +154,7 @@ def main(main_dir, compare_groups):
     return
 
 if __name__ == "__main__":
-    main('Full_data', ['WT_Incline', 'V3Off_Incline'])
+    main('Full_data', [('WT', 'Incline'), ('V3Off', 'Incline')])
 
 
 
