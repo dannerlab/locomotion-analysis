@@ -81,6 +81,11 @@ def graph_mouse(group_name, mouse_id, joint_or_seg, windows_array_all_trials, av
     ax.set_title(f'{joint_or_seg} for {group_name}_{mouse_id}')
     ax.set_xlabel('Time (s)')
     ax.set_ylabel(f'{joint_or_seg} (degrees)')
+    plt.ylim([0, 180])
+    plt.yticks(np.arange(0, 181, 30))
+    if joint_or_seg in ['Shank_angle', 'Crest_angle']:
+        plt.ylim([-30, 150])
+        plt.yticks(np.arange(-30, 151, 30))
     ax.set_xlim(-0.15, 0.25)
 
     #save
@@ -88,11 +93,11 @@ def graph_mouse(group_name, mouse_id, joint_or_seg, windows_array_all_trials, av
     if not os.path.exists(f'{super_save_directory}'):
         os.makedirs(f'{super_save_directory}', exist_ok = True)
     plt.savefig(save_path)
-    plt.close
+    plt.close()
 
     return
 
-def main(main_dir, selected_groups):
+def main(main_dir):
     #set up statistics names & rc params
     joints_and_segments = get_joints_and_segments()
     joint_seg_names = [None] * len(joints_and_segments)
@@ -105,18 +110,15 @@ def main(main_dir, selected_groups):
     step_table_unfiltered_extraidx = pd.read_csv(f'{main_dir}/step_table.csv')
     step_table_unfiltered = step_table_unfiltered_extraidx.drop(columns='Unnamed: 0') #remove extra index column
     step_table, excluded_trials = exclude_trials(step_table_unfiltered) #excluded_trials can be printed to see which are being excluded
-    step_table_grouped_all_groups = step_table.groupby(['mouse-type', 'exp-type'])
+    step_table_grouped = step_table.groupby(['mouse-type', 'exp-type'])
     
-    if selected_groups != step_table_grouped_all_groups.groups.keys():
-        step_table_selected = [step_table_grouped_all_groups.get_group(group) for group in selected_groups]
-    step_table_grouped = pd.concat(step_table_selected).groupby(['mouse-type', 'exp-type'])
     save_directory = f'{main_dir}/angle_graphs/toe_off_aligned'
     if not os.path.exists(save_directory):
         os.makedirs(save_directory, exist_ok = True)
 
     #actually make the graphs
-    for joint_or_seg in joint_seg_names:
-        for group, group_data in step_table_grouped: #should run twice, each group on own axes
+    for group, group_data in step_table_grouped: #should run twice, each group on own axes
+        for joint_or_seg in joint_seg_names:
             group_name = '_'.join(group) #should be something like WT_Levelwalk
             super_save_directory = f'{main_dir}/angle_graphs/toe_touch_aligned_window/{group_name}'
             step_table_by_mouse = group_data.groupby('mouse-id') #get mouse-wise data
@@ -124,8 +126,7 @@ def main(main_dir, selected_groups):
                 windows_array_all_trials, avg_window, stdv_window = get_mouse_window_array(mouse_data, joint_or_seg)
                 #plot
                 graph_mouse(group_name, mouse_id, joint_or_seg, windows_array_all_trials, avg_window, stdv_window, super_save_directory)
-            print(f'saved to: {super_save_directory}')
+        print(f'saved to: {super_save_directory}')
 
 if __name__ == "__main__":
-    selected_groups = [('WT', 'Incline'), ('V3Off', 'Incline')]############edit to change groups, can only be 2
-    main('Full_data', selected_groups)
+    main('Full_data')
