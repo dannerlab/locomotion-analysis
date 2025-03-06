@@ -20,6 +20,8 @@ from useful_imports import exclude_trials, get_prelim_exclude_trials
 from all_joint_angle_toe_off import main as all_joint_angle_toe_off
 from mouse_joint_angles_toe_touch import main as mouse_joint_angles_toe_touch
 from mouse_joint_angles_toe_off import main as mouse_joint_angles_toe_off
+from joint_angles_window import main as joint_angles_window
+from mouse_joint_angles_window import main as mouse_joint_angles_window
 import pandas as pd
 
 ###########################################################################
@@ -58,6 +60,7 @@ paired_groups = [
                  [('WT', 'Levelwalk'), ('V3Off', 'Levelwalk')],
                  [('WT', 'Incline'), ('V3Off', 'Incline')]
                  ]
+
 for pair in paired_groups:
     print(f'processing: {pair}')
 
@@ -79,6 +82,9 @@ for pair in paired_groups:
         #saves graphs to main_dir/angle_graphs/toe_off_aligned
     print()
 
+    joint_angles_window(main_dir, pair)
+        #saves graphs to main_dir/angle_graphs/toe_touch_aligned_window
+
 
 mouse_joint_angles_toe_touch(main_dir)
     #saves graphs to main_dir/angle_graphs/toe_touch_aligned/group_dir
@@ -87,6 +93,8 @@ print()
 mouse_joint_angles_toe_off(main_dir)
     #saves graphs to main_dir/angle_graphs/toe_off_aligned/group_dir
 print()
+
+mouse_joint_angles_window(main_dir)
 
 stop_time = time.time()
 
