@@ -100,6 +100,11 @@ def graph_one_group(group_graph_dict, joint_or_seg, save_directory):
     ax.set_title(f'{joint_or_seg} for {group_name}')
     ax.set_xlabel('Time (s)')
     ax.set_ylabel(f'{joint_or_seg} (degrees)')
+    plt.ylim([0, 180])
+    plt.yticks(np.arange(0, 181, 30))
+    if joint_or_seg in ['Shank_angle', 'Crest_angle']:
+        plt.ylim([-30, 150])
+        plt.yticks(np.arange(-30, 151, 30))
     ax.set_xlim(-0.15, 0.25)
 
     #save
@@ -119,6 +124,7 @@ def graph_both_groups(group_dicts, joint_or_seg, save_directory):
 
     both_groups_name = "_".join([group_graph_dict['group_name'] for group_graph_dict in group_dicts])
     fig, ax = plt.subplots()
+    xaxistime = np.linspace(-0.15, 0.25, int(0.4 * get_sampling_freq()))
 
     
     for group_graph_dict in group_dicts:
@@ -129,16 +135,23 @@ def graph_both_groups(group_dicts, joint_or_seg, save_directory):
         stdv_list = group_graph_dict['group_stdv']
     
         #plot lines for one group
-        ax.plot(avg_list, color= color, label='Group Average', linewidth=2)
-        plt.fill_between(np.arange(len(avg_list)), avg_list - stdv_list, avg_list + stdv_list, color=color, alpha=0.2)
+        ax.plot(xaxistime, avg_list, color= color, label='Group Average', linewidth=2)
+        plt.fill_between(xaxistime, avg_list - stdv_list, avg_list + stdv_list, color=color, alpha=0.2)
         for mouse_id, mouse_avg in mouse_avg_dict.items():
-            ax.plot(mouse_avg, color= color, label=mouse_id, alpha = 0.25)
-        ax.axvline(0.15 * get_sampling_freq(), color='black', linestyle='--', label='Toe Touch')
+            ax.plot(xaxistime, mouse_avg, color= color, label=mouse_id, alpha = 0.25)
+        ax.axvline(0, color='black', linestyle='--', label='Toe Touch')
 
     #labels, format
     ax.set_title(f'{joint_or_seg} for {both_groups_name}')
     ax.set_xlabel('Time (s)')
     ax.set_ylabel(f'{joint_or_seg} (degrees)')
+    plt.ylim([0, 180])
+    plt.yticks(np.arange(0, 181, 30))
+    if joint_or_seg in ['Shank_angle', 'Crest_angle']:
+        plt.ylim([-30, 150])
+        plt.yticks(np.arange(-30, 151, 30))
+    ax.set_xlim(-0.15, 0.25)
+    
 
     #save
     save_dir = f'{save_directory}/{both_groups_name}_{joint_or_seg}.png'
