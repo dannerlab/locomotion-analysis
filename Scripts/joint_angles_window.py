@@ -132,7 +132,7 @@ def graph_both_groups(group_dicts, joint_or_seg, save_directory):
         ax.plot(avg_list, color= color, label='Group Average', linewidth=2)
         plt.fill_between(np.arange(len(avg_list)), avg_list - stdv_list, avg_list + stdv_list, color=color, alpha=0.2)
         for mouse_id, mouse_avg in mouse_avg_dict.items():
-            ax.plot(mouse_avg, color= 'black', label=mouse_id, alpha = 0.25)
+            ax.plot(mouse_avg, color= color, label=mouse_id, alpha = 0.25)
         ax.axvline(0.15 * get_sampling_freq(), color='black', linestyle='--', label='Toe Touch')
 
     #labels, format
